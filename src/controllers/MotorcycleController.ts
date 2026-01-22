@@ -21,8 +21,6 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
 
   private jumpVelocity: number = 0
   private groundY: number = 0
-  private dyingTime: number = 0
-  private exitDirection: 1 | -1 = 1
 
   get state(): CharacterState {
     return this._state
@@ -84,7 +82,6 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this.targetLane = null
     this.isLaneSwitching = false
     this.laneProgress = 0
-    this.exitDirection = 1
     this.rebuildCharacter()
     this.animator.reset()
   }
@@ -112,8 +109,6 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
   die(): void {
     this._state = CharacterState.DYING
     this.animator.setState(AnimationState.DYING)
-    this.dyingTime = 0
-    this.exitDirection = this.currentLane === 'left' ? -1 : 1
   }
 
   triggerVoxelBurst(): THREE.Matrix4 {

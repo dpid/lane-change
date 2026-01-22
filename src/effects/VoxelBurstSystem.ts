@@ -16,7 +16,7 @@ export class VoxelBurstSystem {
   private activeBurst = false
   private onCompleteCallback: (() => void) | null = null
 
-  constructor(private scene: THREE.Scene) {
+  constructor(scene: THREE.Scene) {
     this.geometry = new THREE.BoxGeometry(
       VoxelBurstConfig.VOXEL_SIZE,
       VoxelBurstConfig.VOXEL_SIZE,
