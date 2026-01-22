@@ -120,8 +120,6 @@ export class MotorcycleFactory implements GeometryFactory<MotorcycleOptions> {
       new THREE.CylinderGeometry(0.08, 0.08, 0.09),
       new THREE.MeshLambertMaterial({ color: 0x444444 })
     )
-    frontWheelRim.rotation.z = Math.PI / 2
-    frontWheelRim.position.set(0, 0.15, -0.8)
     frontWheel.add(frontWheelRim)
 
     const rearWheel = new THREE.Mesh(
@@ -136,8 +134,6 @@ export class MotorcycleFactory implements GeometryFactory<MotorcycleOptions> {
       new THREE.CylinderGeometry(0.1, 0.1, 0.11),
       new THREE.MeshLambertMaterial({ color: 0x444444 })
     )
-    rearWheelRim.rotation.z = Math.PI / 2
-    rearWheelRim.position.set(0, 0.18, 0.5)
     rearWheel.add(rearWheelRim)
 
     const riderGroup = new THREE.Group()

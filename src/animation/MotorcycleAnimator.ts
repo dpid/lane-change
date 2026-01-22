@@ -83,10 +83,10 @@ export class MotorcycleAnimator implements AnimationController {
     this.wheelRotation += AnimationConfig.WHEEL_ROTATION_SPEED * delta
 
     if (this.frontWheel) {
-      this.frontWheel.rotation.z = this.wheelRotation
+      this.frontWheel.rotation.x = -this.wheelRotation
     }
     if (this.rearWheel) {
-      this.rearWheel.rotation.z = this.wheelRotation
+      this.rearWheel.rotation.x = -this.wheelRotation
     }
 
     this.currentLean = 0
@@ -99,10 +99,10 @@ export class MotorcycleAnimator implements AnimationController {
     this.wheelRotation += AnimationConfig.WHEEL_ROTATION_SPEED * delta
 
     if (this.frontWheel) {
-      this.frontWheel.rotation.z = this.wheelRotation
+      this.frontWheel.rotation.x = -this.wheelRotation
     }
     if (this.rearWheel) {
-      this.rearWheel.rotation.z = this.wheelRotation
+      this.rearWheel.rotation.x = -this.wheelRotation
     }
 
     if (context.targetLane && this.bodyPivot) {
@@ -133,10 +133,10 @@ export class MotorcycleAnimator implements AnimationController {
     this.currentLean = 0
 
     if (this.frontWheel) {
-      this.frontWheel.rotation.z = 0
+      this.frontWheel.rotation.x = 0
     }
     if (this.rearWheel) {
-      this.rearWheel.rotation.z = 0
+      this.rearWheel.rotation.x = 0
     }
     if (this.bodyPivot && this.initialBodyRotation) {
       this.bodyPivot.rotation.copy(this.initialBodyRotation)
