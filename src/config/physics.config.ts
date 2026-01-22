@@ -1,5 +1,6 @@
 export const PhysicsConfig = {
-  SCROLL_SPEED: 10,
+  SCROLL_SPEED: 20,
+  OBSTACLE_SCROLL_FACTOR: 0.5,
   LANE_SWITCH_SPEED: 8,
   LANE_LEFT_X: -1.5,
   LANE_RIGHT_X: 1.5,

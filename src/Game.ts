@@ -150,15 +150,19 @@ export class Game {
       delta = MAX_DELTA
     }
 
-    if (this.state !== GameState.MENU) {
+    if (this.state === GameState.PLAYING) {
       this.background.update(delta, this.scrollSpeed)
       this.ground.update(delta, this.scrollSpeed)
     }
 
-    if (this.state === GameState.PLAYING) {
-      this.obstacleManager.update(delta, this.scrollSpeed)
-      this.powerupManager.update(delta, this.scrollSpeed)
+    const obstacleScrollSpeed = this.scrollSpeed * PhysicsConfig.OBSTACLE_SCROLL_FACTOR
 
+    if (this.state === GameState.PLAYING || this.state === GameState.DYING || this.state === GameState.GAME_OVER) {
+      this.obstacleManager.update(delta, obstacleScrollSpeed)
+      this.powerupManager.update(delta, obstacleScrollSpeed)
+    }
+
+    if (this.state === GameState.PLAYING) {
       const motorcycleBox = this.motorcycle.getBoundingBox()
       const currentLane = this.motorcycle.getCurrentLane()
 
