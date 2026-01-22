@@ -13,8 +13,6 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
   private animator: MotorcycleAnimator
   private geometryParts!: GeometryParts
   private _group: THREE.Group
-  private shadow!: THREE.Mesh
-  private scene: THREE.Scene
 
   private currentLane: 'left' | 'right' = 'right'
   private targetLane: 'left' | 'right' | null = null
@@ -36,13 +34,11 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
 
   constructor(scene: THREE.Scene) {
     super()
-    this.scene = scene
     this.factory = new MotorcycleFactory()
     this.animator = new MotorcycleAnimator()
     this._group = new THREE.Group()
 
     this.buildCharacter()
-    this.buildShadow()
 
     this._group.position.set(PhysicsConfig.LANE_RIGHT_X, PhysicsConfig.DROP_START_Y, 0)
     this._group.visible = false
@@ -53,34 +49,6 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this.geometryParts = this.factory.create()
     this.animator.attach(this.geometryParts)
     this._group.add(this.geometryParts.root)
-  }
-
-  private buildShadow(): void {
-    const shadowGeometry = new THREE.PlaneGeometry(1, 0.6)
-    const shadowMaterial = new THREE.MeshBasicMaterial({
-      color: 0x000000,
-      transparent: true,
-      opacity: 0.3,
-      depthWrite: false
-    })
-    this.shadow = new THREE.Mesh(shadowGeometry, shadowMaterial)
-    this.shadow.rotation.x = -Math.PI / 2
-    this.shadow.position.set(PhysicsConfig.LANE_RIGHT_X, 0.02, 0)
-    this.shadow.visible = false
-    this.scene.add(this.shadow)
-  }
-
-  private updateShadow(): void {
-    const height = Math.max(0, this._group.position.y - this.groundY)
-    const t = Math.min(height / PhysicsConfig.SHADOW_MAX_HEIGHT, 1)
-    const scale = PhysicsConfig.SHADOW_BASE_SCALE - t * (PhysicsConfig.SHADOW_BASE_SCALE - PhysicsConfig.SHADOW_MIN_SCALE)
-
-    this.shadow.scale.set(scale, scale, 1)
-    this.shadow.position.x = this._group.position.x
-    this.shadow.position.z = this._group.position.z
-
-    const material = this.shadow.material as THREE.MeshBasicMaterial
-    material.opacity = PhysicsConfig.SHADOW_BASE_OPACITY * (1 - t * 0.5)
   }
 
   handleAction(action: InputAction): void {
@@ -108,8 +76,6 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
   spawn(): void {
     this._state = CharacterState.IDLE
     this._group.visible = false
-    this.shadow.visible = false
-    this.shadow.scale.set(1, 1, 1)
     this._group.position.set(PhysicsConfig.LANE_RIGHT_X, PhysicsConfig.DROP_START_Y, 0)
     this._group.rotation.set(0, 0, 0)
     this._group.scale.set(1, 1, 1)
@@ -139,7 +105,6 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this._state = CharacterState.DROPPING
     this.animator.setState(AnimationState.DROPPING)
     this._group.visible = true
-    this.shadow.visible = true
     this._group.position.y = PhysicsConfig.DROP_START_Y
     this.jumpVelocity = 0
   }
@@ -150,7 +115,6 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this.dyingTime = 0
     this.jumpVelocity = PhysicsConfig.CRASH_POP_VELOCITY
     this.exitDirection = this.currentLane === 'left' ? -1 : 1
-    this.shadow.visible = false
     this.tintRed()
     this.renderOnTop()
   }
@@ -188,7 +152,6 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
         this.updateDying(delta)
         break
     }
-    this.updateShadow()
   }
 
   private updateDropping(delta: number): void {
