@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import { MotorcycleController } from './controllers'
-import { ObstacleManager } from './systems/ObstacleManager'
-import { PowerupManager } from './systems/PowerupManager'
+import { ItemManager } from './systems/ItemManager'
 import { Background } from './systems/Background'
 import { Ground } from './systems/Ground'
 import { ScrollManager } from './systems/ScrollManager'
@@ -29,8 +28,7 @@ export class Game {
   private clock: THREE.Clock
 
   private motorcycle!: MotorcycleController
-  private obstacleManager!: ObstacleManager
-  private powerupManager!: PowerupManager
+  private itemManager!: ItemManager
   private background!: Background
   private ground!: Ground
   private scrollManager!: ScrollManager
@@ -93,8 +91,7 @@ export class Game {
     this.background = new Background(this.scene, this.scrollManager.worldContainer)
     this.ground = new Ground(this.scene, this.scrollManager.worldContainer)
     this.motorcycle = new MotorcycleController(this.scene)
-    this.obstacleManager = new ObstacleManager(this.scrollManager.worldContainer)
-    this.powerupManager = new PowerupManager(this.scrollManager.worldContainer)
+    this.itemManager = new ItemManager(this.scrollManager.worldContainer)
     this.ui = new UI()
     this.inputManager = new InputManager()
 
@@ -141,8 +138,7 @@ export class Game {
 
   private restartGame(): void {
     this.scrollManager.reset()
-    this.obstacleManager.reset()
-    this.powerupManager.reset()
+    this.itemManager.reset()
     this.motorcycle.reset()
     this.startGame()
   }
@@ -162,32 +158,30 @@ export class Game {
     }
 
     if (this.state === GameState.PLAYING || this.state === GameState.DYING || this.state === GameState.GAME_OVER) {
-      this.obstacleManager.update(delta)
-      this.powerupManager.update(delta)
+      this.itemManager.update(delta)
     }
 
     if (this.state === GameState.PLAYING) {
       const motorcycleBox = this.motorcycle.getBoundingBox()
       const currentLane = this.motorcycle.getCurrentLane()
+      const motorcycleZ = this.motorcycle.getPosition().z
 
-      const passedObstacles = this.obstacleManager.getPassedObstacles(this.motorcycle.getPosition().z)
-      if (passedObstacles > 0) {
-        this.score += passedObstacles * POINTS_PER_OBSTACLE
+      const result = this.itemManager.checkCollisions(motorcycleBox, currentLane, motorcycleZ)
+
+      if (result.passedItems > 0) {
+        this.score += result.passedItems * POINTS_PER_OBSTACLE
         this.ui.updateScore(this.score)
       }
 
-      const collectedCoins = this.powerupManager.checkCollection(motorcycleBox, currentLane)
-      if (collectedCoins > 0) {
-        this.score += collectedCoins * POINTS_PER_COIN
+      if (result.scoreItems > 0) {
+        this.score += result.scoreItems * POINTS_PER_COIN
         this.ui.updateScore(this.score)
       }
 
-      const hasCollision = this.obstacleManager.checkCollision(motorcycleBox, currentLane)
-      if (hasCollision && !this.motorcycle.isDead()) {
+      if (result.killed && !this.motorcycle.isDead()) {
         this.motorcycle.loseHitpoint(this.scrollManager.getScrollSpeed())
         this.scrollManager.stopScrolling()
-        this.obstacleManager.setSpawnDirection('toward_horizon')
-        this.powerupManager.setSpawnDirection('toward_horizon')
+        this.itemManager.setSpawnDirection('toward_horizon')
         this.state = GameState.DYING
       }
     }

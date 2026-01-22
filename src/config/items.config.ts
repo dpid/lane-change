@@ -1,0 +1,48 @@
+export enum GeometryType {
+  CAR = 'CAR',
+  TRUCK = 'TRUCK',
+  COIN = 'COIN'
+}
+
+export enum EffectType {
+  KILL = 'kill',
+  SCORE = 'score'
+}
+
+export interface ItemDefinition {
+  geometryType: GeometryType
+  effectType: EffectType
+  cardCount: number
+  yOffset: number
+  collisionModifier: number
+  rotates: boolean
+}
+
+const RIDER_HEIGHT = 0.8
+
+export const ItemDefinitions: Record<GeometryType, ItemDefinition> = {
+  [GeometryType.CAR]: {
+    geometryType: GeometryType.CAR,
+    effectType: EffectType.KILL,
+    cardCount: 50,
+    yOffset: 0,
+    collisionModifier: -0.1,
+    rotates: false
+  },
+  [GeometryType.TRUCK]: {
+    geometryType: GeometryType.TRUCK,
+    effectType: EffectType.KILL,
+    cardCount: 20,
+    yOffset: 0,
+    collisionModifier: -0.1,
+    rotates: false
+  },
+  [GeometryType.COIN]: {
+    geometryType: GeometryType.COIN,
+    effectType: EffectType.SCORE,
+    cardCount: 30,
+    yOffset: RIDER_HEIGHT,
+    collisionModifier: 0.15,
+    rotates: true
+  }
+} as const

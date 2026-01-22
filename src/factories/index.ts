@@ -1,5 +1,4 @@
 export * from './GeometryFactory'
 export * from './MotorcycleFactory'
-export * from './ObstacleFactory'
-export * from './PowerupFactory'
+export * from './ItemFactory'
 export * from './SceneryFactory'

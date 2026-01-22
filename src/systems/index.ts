@@ -1,5 +1,4 @@
-export { ObstacleManager } from './ObstacleManager'
-export { PowerupManager } from './PowerupManager'
+export { ItemManager } from './ItemManager'
 export { Background } from './Background'
 export { Ground } from './Ground'
 export { ScrollManager } from './ScrollManager'

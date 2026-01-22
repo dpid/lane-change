@@ -1,35 +1,34 @@
 import * as THREE from 'three'
 import { GeometryFactory, GeometryParts, disposeGeometryParts } from './GeometryFactory'
-import { ObstacleColors } from '../config'
+import { ObstacleColors, PowerupColors } from '../config'
+import { GeometryType } from '../config/items.config'
 
-export enum ObstacleType {
-  CAR = 'CAR',
-  TRUCK = 'TRUCK'
-}
-
-export interface ObstacleOptions {
-  type: ObstacleType
+export interface ItemOptions {
+  geometryType: GeometryType
   colorIndex?: number
 }
 
-export class ObstacleFactory implements GeometryFactory<ObstacleOptions> {
-  create(options: ObstacleOptions): GeometryParts {
+export class ItemFactory implements GeometryFactory<ItemOptions> {
+  create(options: ItemOptions): GeometryParts {
     const parts = new Map<string, THREE.Object3D>()
     const root = new THREE.Group()
 
-    switch (options.type) {
-      case ObstacleType.CAR:
+    switch (options.geometryType) {
+      case GeometryType.CAR:
         this.buildCar(root, parts, options)
         break
-      case ObstacleType.TRUCK:
+      case GeometryType.TRUCK:
         this.buildTruck(root, parts)
+        break
+      case GeometryType.COIN:
+        this.buildCoin(root, parts)
         break
     }
 
     return { root, parts }
   }
 
-  private buildCar(root: THREE.Group, parts: Map<string, THREE.Object3D>, options: ObstacleOptions): void {
+  private buildCar(root: THREE.Group, parts: Map<string, THREE.Object3D>, options: ItemOptions): void {
     const colorIndex = options.colorIndex ?? Math.floor(Math.random() * ObstacleColors.sedans.length)
     const bodyColor = ObstacleColors.sedans[colorIndex]
     const bodyMaterial = new THREE.MeshLambertMaterial({ color: bodyColor })
@@ -218,6 +217,22 @@ export class ObstacleFactory implements GeometryFactory<ObstacleOptions> {
     wheelsGroup.add(frontLeft, frontRight, rearLeft1, rearRight1, rearLeft2, rearRight2)
 
     root.add(bodyGroup, wheelsGroup)
+  }
+
+  private buildCoin(root: THREE.Group, parts: Map<string, THREE.Object3D>): void {
+    const material = new THREE.MeshLambertMaterial({ color: PowerupColors.coin })
+
+    const coinRadius = 0.3
+    const coinThickness = 0.05
+
+    const coin = new THREE.Mesh(
+      new THREE.CylinderGeometry(coinRadius, coinRadius, coinThickness, 8),
+      material
+    )
+    coin.rotation.x = Math.PI / 2
+
+    parts.set('coin', coin)
+    root.add(coin)
   }
 
   dispose(geometry: GeometryParts): void {
