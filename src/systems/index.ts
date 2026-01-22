@@ -1,0 +1,4 @@
+export { ObstacleManager } from './ObstacleManager'
+export { PowerupManager } from './PowerupManager'
+export { Background } from './Background'
+export { Ground } from './Ground'

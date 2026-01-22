@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lane Change</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      overflow: hidden;
+      background: #1a1a1a;
+    }
+    canvas {
+      display: block;
+    }
+    #ui {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      font-family: 'Courier New', monospace;
+    }
+    #score {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 24px;
+      color: #fff;
+      text-shadow: -3px 3px 0 #000;
+      display: none;
+    }
+    #menu {
+      position: absolute;
+      top: 34%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+    #menu h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 36px;
+      color: #00d4ff;
+      text-shadow: -4px 4px 0 #000;
+      margin-bottom: 40px;
+      line-height: 1.4;
+    }
+    .btn {
+      pointer-events: auto;
+      padding: 15px 40px;
+      font-size: 18px;
+      font-family: 'Press Start 2P', monospace;
+      background: #ff6600;
+      color: #fff;
+      border: 4px solid #cc5200;
+      cursor: pointer;
+      text-shadow: -2px 2px 0 #000;
+      box-shadow: -4px 4px 0 #000;
+    }
+    .btn:hover {
+      background: #ff8833;
+    }
+    .btn:active {
+      transform: translate(-2px, 2px);
+      box-shadow: -2px 2px 0 #000;
+    }
+    #gameOver {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      display: none;
+    }
+    #gameOver h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 28px;
+      color: #ff3333;
+      text-shadow: -3px 3px 0 #000;
+      margin-bottom: 30px;
+    }
+    #finalScore {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 20px;
+      color: #fff;
+      text-shadow: -2px 2px 0 #000;
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div id="ui">
+    <div id="score">0</div>
+    <div id="menu">
+      <h1>LANE CHANGE</h1>
+      <button id="playBtn" class="btn">PLAY</button>
+    </div>
+    <div id="gameOver">
+      <h2>GAME OVER</h2>
+      <div id="finalScore">Score: 0</div>
+      <button id="playAgainBtn" class="btn">PLAY AGAIN</button>
+    </div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
