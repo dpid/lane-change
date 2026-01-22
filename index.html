@@ -42,18 +42,18 @@
     }
     #menu {
       position: absolute;
-      top: 34%;
+      top: 45%;
       left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    #menu h1 {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 36px;
-      color: #00d4ff;
-      text-shadow: -4px 4px 0 #000;
+    #menu .logo {
+      width: 600px;
+      height: auto;
       margin-bottom: 40px;
-      line-height: 1.4;
+      image-rendering: pixelated;
     }
     .btn {
       pointer-events: auto;
@@ -102,7 +102,7 @@
   <div id="ui">
     <div id="score">0</div>
     <div id="menu">
-      <h1>LANE CHANGE</h1>
+      <img src="/lane-change-logo.png" alt="Lane Change" class="logo">
       <button id="playBtn" class="btn">PLAY</button>
     </div>
     <div id="gameOver">
