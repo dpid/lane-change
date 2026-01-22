@@ -78,14 +78,66 @@ export class SceneryFactory implements GeometryFactory<SceneryOptions> {
     ctx.fillRect(0, height - stripeHeight, width, stripeHeight)
 
     ctx.fillStyle = '#cc2222'
-    ctx.font = 'bold 72px sans-serif'
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText('FUN', width / 2, (height - stripeHeight) / 2)
+    this.drawPixelText(ctx, 'FUN', width / 2, (height - stripeHeight) / 2)
 
     const texture = new THREE.CanvasTexture(canvas)
     texture.colorSpace = THREE.SRGBColorSpace
     return texture
+  }
+
+  private drawPixelText(ctx: CanvasRenderingContext2D, text: string, centerX: number, centerY: number): void {
+    const pixelPatterns: Record<string, number[][]> = {
+      F: [
+        [1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0],
+        [1, 1, 1, 1, 0],
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0]
+      ],
+      U: [
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [0, 1, 1, 1, 0]
+      ],
+      N: [
+        [1, 0, 0, 0, 1],
+        [1, 1, 0, 0, 1],
+        [1, 0, 1, 0, 1],
+        [1, 0, 0, 1, 1],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1]
+      ]
+    }
+
+    const pixelSize = 8
+    const letterWidth = 5
+    const letterHeight = 7
+    const letterSpacing = 1
+    const totalWidth = text.length * (letterWidth + letterSpacing) - letterSpacing
+    const startX = centerX - (totalWidth * pixelSize) / 2
+    const startY = centerY - (letterHeight * pixelSize) / 2
+
+    for (let i = 0; i < text.length; i++) {
+      const pattern = pixelPatterns[text[i]]
+      if (!pattern) continue
+
+      const letterX = startX + i * (letterWidth + letterSpacing) * pixelSize
+
+      for (let row = 0; row < letterHeight; row++) {
+        for (let col = 0; col < letterWidth; col++) {
+          if (pattern[row][col]) {
+            ctx.fillRect(letterX + col * pixelSize, startY + row * pixelSize, pixelSize, pixelSize)
+          }
+        }
+      }
+    }
   }
 
   dispose(geometry: GeometryParts): void {

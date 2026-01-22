@@ -6,7 +6,7 @@ export const SpawnConfig = {
 
   ITEM_SPAWN_INTERVAL: 1.5,
 
-  NEAR_OBJECTS_X: 5,
+  NEAR_OBJECTS_X: 7,
 
   LANE_DASH_LENGTH: 3,
   LANE_DASH_GAP: 2,
