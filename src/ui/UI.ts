@@ -26,7 +26,7 @@ export class UI {
   showGameOver(finalScore: number): void {
     this.menuElement.style.display = 'none'
     this.scoreElement.style.display = 'none'
-    this.gameOverElement.style.display = 'block'
+    this.gameOverElement.style.display = 'flex'
     this.finalScoreElement.textContent = `Score: ${finalScore}`
   }
 
@@ -35,12 +35,10 @@ export class UI {
   }
 
   onPlay(callback: () => void): void {
-    const playBtn = document.getElementById('playBtn')!
-    playBtn.addEventListener('click', callback)
+    this.menuElement.addEventListener('click', callback)
   }
 
   onPlayAgain(callback: () => void): void {
-    const playAgainBtn = document.getElementById('playAgainBtn')!
-    playAgainBtn.addEventListener('click', callback)
+    this.gameOverElement.addEventListener('click', callback)
   }
 }
