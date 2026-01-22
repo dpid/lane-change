@@ -12,9 +12,10 @@ scene
 ├── camera
 ├── sky (fixed)
 ├── road plane (fixed)
+├── grass planes (fixed, flanking road)
 ├── motorcycle + shadow (fixed position, lane switching only)
 └── worldContainer (scrolls during gameplay)
-    ├── background buildings (with wrapping)
+    ├── roadside signs (with wrapping)
     ├── lane markings + edge lines (with wrapping)
     ├── obstacles (own velocity relative to container)
     └── powerups (own velocity relative to container)

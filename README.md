@@ -62,8 +62,8 @@ src/
 │   ├── ScrollManager.ts    # World container and scroll control
 │   ├── ObstacleManager.ts  # Obstacle spawning and collision
 │   ├── PowerupManager.ts   # Coin spawning and collection
-│   ├── Background.ts       # Buildings and scenery
-│   └── Ground.ts           # Road and lane markings
+│   ├── Background.ts       # Sky and roadside signs
+│   └── Ground.ts           # Road, grass, and lane markings
 ├── animation/       # Visual animations
 ├── input/           # Input handling (keyboard, mouse, touch)
 ├── pooling/         # Object pooling for performance
