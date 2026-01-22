@@ -106,15 +106,9 @@ export class MotorcycleAnimator implements AnimationController {
     }
 
     if (context.targetLane && this.bodyPivot) {
-      const targetLean = context.targetLane === 'left' ? AnimationConfig.LEAN_ANGLE : -AnimationConfig.LEAN_ANGLE
-      const leanDelta = AnimationConfig.LEAN_TRANSITION_SPEED * delta
-
-      if (context.laneProgress < 1) {
-        this.currentLean = THREE.MathUtils.lerp(this.currentLean, targetLean, leanDelta)
-      } else {
-        this.currentLean = THREE.MathUtils.lerp(this.currentLean, 0, leanDelta)
-      }
-
+      const leanDirection = context.targetLane === 'left' ? 1 : -1
+      const leanAmount = Math.sin(context.laneProgress * Math.PI)
+      this.currentLean = leanDirection * leanAmount * AnimationConfig.LEAN_ANGLE
       this.bodyPivot.rotation.z = this.currentLean
     }
   }
