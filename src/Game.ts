@@ -170,20 +170,19 @@ export class Game {
       const motorcycleBox = this.motorcycle.getBoundingBox()
       const currentLane = this.motorcycle.getCurrentLane()
 
-      const worldZ = this.scrollManager.worldContainer.position.z
-      const passedObstacles = this.obstacleManager.getPassedObstacles(this.motorcycle.getPosition().z, worldZ)
+      const passedObstacles = this.obstacleManager.getPassedObstacles(this.motorcycle.getPosition().z)
       if (passedObstacles > 0) {
         this.score += passedObstacles * POINTS_PER_OBSTACLE
         this.ui.updateScore(this.score)
       }
 
-      const collectedCoins = this.powerupManager.checkCollection(motorcycleBox, currentLane, worldZ)
+      const collectedCoins = this.powerupManager.checkCollection(motorcycleBox, currentLane)
       if (collectedCoins > 0) {
         this.score += collectedCoins * POINTS_PER_COIN
         this.ui.updateScore(this.score)
       }
 
-      const hasCollision = this.obstacleManager.checkCollision(motorcycleBox, currentLane, worldZ)
+      const hasCollision = this.obstacleManager.checkCollision(motorcycleBox, currentLane)
       if (hasCollision && !this.motorcycle.isDead()) {
         this.motorcycle.loseHitpoint(this.scrollManager.getScrollSpeed())
         this.scrollManager.stopScrolling()

@@ -15,10 +15,10 @@ scene
 ├── grass planes (fixed, flanking road)
 ├── motorcycle + shadow (fixed position, lane switching only)
 └── worldContainer (scrolls during gameplay)
-    ├── roadside signs (with wrapping)
-    ├── lane markings + edge lines (with wrapping)
-    ├── obstacles (own velocity relative to container)
-    └── powerups (own velocity relative to container)
+    ├── roadside signs (pooled, spawn/despawn)
+    ├── lane markings + edge lines (pooled, spawn/despawn)
+    ├── obstacles (pooled, own velocity relative to container)
+    └── powerups (pooled, own velocity relative to container)
 ```
 
 **Key behaviors:**
@@ -29,7 +29,10 @@ scene
 
 ### Object Pooling
 
-Obstacles and powerups use object pools to avoid GC pressure. Pools pre-allocate objects and reuse them via acquire/release.
+All spawned entities use object pools to avoid GC pressure. Pools pre-allocate objects and reuse them via acquire/release:
+- Obstacles and powerups spawn at `SPAWN_Z` and despawn at `DESPAWN_Z`
+- Lane dashes, edge lines, and roadside signs follow the same pattern
+- Spawn intervals are calculated from element spacing divided by scroll speed
 
 ### Input System
 
@@ -41,6 +44,8 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 - `src/systems/ScrollManager.ts` - World container and scroll control
 - `src/systems/ObstacleManager.ts` - Obstacle spawning, pooling, collision
 - `src/systems/PowerupManager.ts` - Coin spawning and collection
+- `src/systems/Ground.ts` - Road, grass, lane dashes, edge lines (pooled)
+- `src/systems/Background.ts` - Sky and roadside signs (pooled)
 - `src/config/` - All magic numbers extracted to config files
 
 ## Game States

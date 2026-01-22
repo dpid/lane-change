@@ -128,11 +128,11 @@ export class ObstacleManager {
     this.activeObstacles.push(obstacle)
   }
 
-  checkCollision(motorcycleBox: THREE.Box3, currentLane: 'left' | 'right', worldZ: number): boolean {
+  checkCollision(motorcycleBox: THREE.Box3, currentLane: 'left' | 'right'): boolean {
+    this.container.updateMatrixWorld(true)
     for (const obstacle of this.activeObstacles) {
       if (obstacle.lane === currentLane) {
         const obstacleBox = obstacle.getBoundingBox()
-        obstacleBox.translate(new THREE.Vector3(0, 0, worldZ))
         if (motorcycleBox.intersectsBox(obstacleBox)) {
           return true
         }
@@ -141,11 +141,12 @@ export class ObstacleManager {
     return false
   }
 
-  getPassedObstacles(motorcycleZ: number, worldZ: number): number {
+  getPassedObstacles(motorcycleZ: number): number {
     let count = 0
     const PASSED_THRESHOLD = 0.5
+    const containerZ = (this.container as THREE.Group).position.z
     for (const obstacle of this.activeObstacles) {
-      const obstacleWorldZ = obstacle.group.position.z + worldZ
+      const obstacleWorldZ = obstacle.group.position.z + containerZ
       if (!obstacle.passed && obstacleWorldZ > motorcycleZ + PASSED_THRESHOLD) {
         obstacle.passed = true
         count++

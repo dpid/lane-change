@@ -62,8 +62,8 @@ src/
 │   ├── ScrollManager.ts    # World container and scroll control
 │   ├── ObstacleManager.ts  # Obstacle spawning and collision
 │   ├── PowerupManager.ts   # Coin spawning and collection
-│   ├── Background.ts       # Sky and roadside signs
-│   └── Ground.ts           # Road, grass, and lane markings
+│   ├── Background.ts       # Sky and roadside signs (pooled)
+│   └── Ground.ts           # Road, grass, lane markings (pooled)
 ├── animation/       # Visual animations
 ├── input/           # Input handling (keyboard, mouse, touch)
 ├── pooling/         # Object pooling for performance
@@ -73,6 +73,8 @@ src/
 ## Architecture
 
 The game uses a world scroll container pattern. A `ScrollManager` owns a container that holds all scrolling content. When playing, the container scrolls forward. When the player dies, the container stops but obstacles continue moving with their own velocity (appearing to drive off into the distance).
+
+All spawned entities (obstacles, powerups, lane markings, signs) use object pooling with a spawn/despawn pattern to avoid garbage collection pressure.
 
 ## License
 

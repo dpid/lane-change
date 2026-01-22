@@ -119,7 +119,8 @@ export class PowerupManager {
     this.activePowerups.push(powerup)
   }
 
-  checkCollection(motorcycleBox: THREE.Box3, currentLane: 'left' | 'right', worldZ: number): number {
+  checkCollection(motorcycleBox: THREE.Box3, currentLane: 'left' | 'right'): number {
+    this.container.updateMatrixWorld(true)
     let collectedCount = 0
 
     for (let i = this.activePowerups.length - 1; i >= 0; i--) {
@@ -127,7 +128,6 @@ export class PowerupManager {
 
       if (powerup.lane === currentLane && !powerup.collected) {
         const powerupBox = powerup.getBoundingBox()
-        powerupBox.translate(new THREE.Vector3(0, 0, worldZ))
         if (motorcycleBox.intersectsBox(powerupBox)) {
           powerup.collected = true
           collectedCount++
