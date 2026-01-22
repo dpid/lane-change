@@ -32,12 +32,13 @@ scene
 ScrollManager owns speed progression state. Speed increases over time using a quadratic ease-out curve:
 
 - `BASE_SCROLL_SPEED`: 20 units/sec (starting speed)
-- `MAX_SPEED_MULTIPLIER`: 2.5 (caps at 50 units/sec)
+- `MAX_SPEED_MULTIPLIER`: 5 (caps at 100 units/sec)
 - `SPEED_RAMP_DURATION`: 120 seconds to reach ~100% of max
 
 **Key behaviors:**
 - Progression only advances during PLAYING state (not DROPPING)
 - Spawn intervals decrease proportionally (`1 / multiplier`) to maintain visual density
+- Lane switch speed and lean angle scale with speed multiplier (base values are 1/5 of max)
 - On death: progression resets so game over items move at base speed
 - On restart: full reset via `scrollManager.reset()`
 

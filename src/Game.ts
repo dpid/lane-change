@@ -190,7 +190,7 @@ export class Game {
     }
 
     if (this.state === GameState.DROPPING || this.state === GameState.PLAYING || this.state === GameState.DYING) {
-      this.motorcycle.update(delta)
+      this.motorcycle.update(delta, this.scrollManager.getSpeedMultiplier())
     }
 
     this.renderer.render(this.scene, this.camera)

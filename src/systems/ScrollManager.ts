@@ -10,7 +10,7 @@ export class ScrollManager {
     this.worldContainer = new THREE.Group()
   }
 
-  private calculateSpeedMultiplier(): number {
+  getSpeedMultiplier(): number {
     const t = this.elapsedTime / PhysicsConfig.SPEED_RAMP_DURATION
     const curve = 1 - Math.pow(Math.max(0, 1 - t), 2)
     return 1 + curve * (PhysicsConfig.MAX_SPEED_MULTIPLIER - 1)
@@ -33,11 +33,11 @@ export class ScrollManager {
   }
 
   getScrollSpeed(): number {
-    return PhysicsConfig.BASE_SCROLL_SPEED * this.calculateSpeedMultiplier()
+    return PhysicsConfig.BASE_SCROLL_SPEED * this.getSpeedMultiplier()
   }
 
   getSpawnIntervalMultiplier(): number {
-    return 1 / this.calculateSpeedMultiplier()
+    return 1 / this.getSpeedMultiplier()
   }
 
   updateProgression(delta: number): void {

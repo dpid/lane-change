@@ -170,7 +170,7 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     })
   }
 
-  update(delta: number): void {
+  update(delta: number, speedMultiplier: number = 1): void {
     switch (this._state) {
       case CharacterState.DROPPING:
         this.updateDropping(delta)
@@ -179,7 +179,7 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
         this.updateRunning(delta)
         break
       case CharacterState.JUMPING:
-        this.updateJumping(delta)
+        this.updateJumping(delta, speedMultiplier)
         break
       case CharacterState.DYING:
         this.updateDying(delta)
@@ -219,12 +219,12 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this.animator.update(delta, context)
   }
 
-  private updateJumping(delta: number): void {
+  private updateJumping(delta: number, speedMultiplier: number): void {
     if (!this.targetLane || !this.isLaneSwitching) {
       return
     }
 
-    this.laneProgress += PhysicsConfig.LANE_SWITCH_SPEED * delta
+    this.laneProgress += PhysicsConfig.LANE_SWITCH_SPEED * speedMultiplier * delta
 
     if (this.laneProgress >= 1) {
       this.laneProgress = 1
@@ -237,7 +237,7 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
 
     const leanDirection = this.targetLane === 'left' ? 1 : -1
     const leanAmount = Math.sin(easedProgress * Math.PI)
-    this._group.rotation.z = leanDirection * leanAmount * PhysicsConfig.LANE_LEAN_ANGLE
+    this._group.rotation.z = leanDirection * leanAmount * PhysicsConfig.LANE_LEAN_ANGLE * speedMultiplier
 
     const context: MotorcycleAnimationContext = {
       targetLane: this.targetLane,
