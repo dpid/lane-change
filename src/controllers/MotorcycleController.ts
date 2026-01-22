@@ -232,7 +232,8 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
 
     const startX = this.currentLane === 'left' ? PhysicsConfig.LANE_LEFT_X : PhysicsConfig.LANE_RIGHT_X
     const endX = this.targetLane === 'left' ? PhysicsConfig.LANE_LEFT_X : PhysicsConfig.LANE_RIGHT_X
-    this._group.position.x = THREE.MathUtils.lerp(startX, endX, this.laneProgress)
+    const easedProgress = THREE.MathUtils.smoothstep(this.laneProgress, 0, 1)
+    this._group.position.x = THREE.MathUtils.lerp(startX, endX, easedProgress)
 
     const context: MotorcycleAnimationContext = {
       targetLane: this.targetLane,
