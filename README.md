@@ -46,18 +46,22 @@ npm run preview
 ## Tech Stack
 
 - **Three.js** - 3D graphics
+- **MagicaVoxel** - Voxel art assets (.vox format)
 - **TypeScript** - Type safety
 - **Vite** - Build tooling
 
 ## Project Structure
 
 ```
+public/
+└── models/          # MagicaVoxel .vox assets
 src/
 ├── main.ts          # Entry point
 ├── Game.ts          # Main game loop and state management
 ├── config/          # Game constants (physics, spawn, animation)
 ├── controllers/     # Motorcycle control
 ├── factories/       # Entity creation (obstacles, powerups, scenery)
+├── loaders/         # Asset loading (VOX models)
 ├── systems/         # Game systems
 │   ├── ScrollManager.ts    # World container and scroll control
 │   ├── ItemManager.ts      # Item spawning and collision (deck-based)

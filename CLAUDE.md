@@ -57,18 +57,28 @@ Items are spawned using a deck-based system (`SpawnDeck` in `ItemManager.ts`):
 - When the deck is empty, the discard pile is shuffled back into the deck
 - This ensures consistent item distribution while varying order each cycle
 
+### Asset Loading
+
+VOX models (MagicaVoxel format) are loaded via `AssetLoader` singleton at startup:
+- Models stored in `public/models/` for static serving
+- `AssetLoader.loadAll()` preloads all models before game starts
+- `Game.init()` is async to await asset loading
+- Cloned meshes are used for pooled entities to avoid re-parsing
+
 ### Input System
 
 Input providers emit actions through InputManager. Currently supports keyboard, mouse, and touch.
 
 ## Key Files
 
-- `src/Game.ts` - Main game loop and state management
+- `src/Game.ts` - Main game loop and state management (async init)
+- `src/loaders/AssetLoader.ts` - VOX model loading and caching
 - `src/systems/ScrollManager.ts` - World container and scroll control
 - `src/systems/ItemManager.ts` - Item spawning, pooling, collision (deck-based)
 - `src/systems/Ground.ts` - Road, grass, lane dashes, edge lines (pooled)
 - `src/systems/Background.ts` - Sky and roadside signs (pooled)
 - `src/config/` - All magic numbers extracted to config files
+- `public/models/` - MagicaVoxel .vox assets
 
 ## Game States
 
