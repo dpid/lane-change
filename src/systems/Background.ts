@@ -52,24 +52,22 @@ export class Background {
   private createNearLayer(): void {
     const groups: THREE.Group[] = []
     const sceneryFactory = new SceneryFactory()
-    const objectCount = 16
-    const zStart = SpawnConfig.NEAR_OBJECTS_Z
+    const signCount = SpawnConfig.SIGN_COUNT
+    const wrapDistance = SpawnConfig.DESPAWN_Z - SpawnConfig.SPAWN_Z
+    const spacing = wrapDistance / signCount
 
-    for (let i = 0; i < objectCount; i++) {
-      const leftObject = this.createNearObject(sceneryFactory)
-      leftObject.position.set(-SpawnConfig.NEAR_OBJECTS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / objectCount))
-      this.worldContainer.add(leftObject)
-      groups.push(leftObject)
-
-      const rightObject = this.createNearObject(sceneryFactory)
-      rightObject.position.set(SpawnConfig.NEAR_OBJECTS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / objectCount))
-      this.worldContainer.add(rightObject)
-      groups.push(rightObject)
+    for (let i = 0; i < signCount; i++) {
+      const sign = this.createNearObject(sceneryFactory)
+      const isLeft = Math.random() < 0.5
+      const xPos = isLeft ? -SpawnConfig.NEAR_OBJECTS_X : SpawnConfig.NEAR_OBJECTS_X
+      sign.position.set(xPos, 0, SpawnConfig.SPAWN_Z + i * spacing)
+      this.worldContainer.add(sign)
+      groups.push(sign)
     }
 
     this.nearLayer = {
       groups,
-      initialZ: zStart
+      initialZ: SpawnConfig.SPAWN_Z
     }
   }
 
@@ -84,11 +82,11 @@ export class Background {
   }
 
   private wrapLayer(layer: BackgroundLayer, containerZ: number): void {
-    const threshold = SpawnConfig.BACKGROUND_WRAP_DISTANCE / 2
+    const wrapDistance = SpawnConfig.DESPAWN_Z - SpawnConfig.SPAWN_Z
 
     for (const group of layer.groups) {
-      while (group.position.z + containerZ > threshold) {
-        group.position.z -= SpawnConfig.BACKGROUND_WRAP_DISTANCE
+      while (group.position.z + containerZ > SpawnConfig.DESPAWN_Z) {
+        group.position.z -= wrapDistance
       }
     }
   }

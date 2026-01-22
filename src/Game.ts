@@ -57,7 +57,7 @@ export class Game {
     this.scene = new THREE.Scene()
 
     const aspect = window.innerWidth / window.innerHeight
-    this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000)
+    this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 2000)
     this.camera.position.set(0, 3, 8)
     this.camera.lookAt(0, 1, 0)
 

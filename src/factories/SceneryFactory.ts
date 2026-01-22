@@ -25,30 +25,67 @@ export class SceneryFactory implements GeometryFactory<SceneryOptions> {
 
   private buildSign(root: THREE.Group, parts: Map<string, THREE.Object3D>): void {
     const postMaterial = new THREE.MeshLambertMaterial({ color: 0x888888 })
-    const signMaterial = new THREE.MeshLambertMaterial({ color: 0x2d7a2d })
 
-    const postRadius = 0.05
-    const postHeight = 2.5
+    const postRadius = 0.15
+    const signWidth = 2.5
+    const signHeight = 1.2
+    const postHeight = signHeight + signHeight / 2
+    const signDepth = 0.1
+    const postSpacing = signWidth - 0.2
 
-    const post = new THREE.Mesh(
-      new THREE.CylinderGeometry(postRadius, postRadius, postHeight, 6),
+    const leftPost = new THREE.Mesh(
+      new THREE.CylinderGeometry(postRadius, postRadius, postHeight, 8),
       postMaterial
     )
-    post.position.y = postHeight / 2
+    leftPost.position.set(-postSpacing / 2, postHeight / 2, 0)
 
-    const signWidth = 0.6
-    const signHeight = 0.4
-    const signDepth = 0.05
+    const rightPost = new THREE.Mesh(
+      new THREE.CylinderGeometry(postRadius, postRadius, postHeight, 8),
+      postMaterial
+    )
+    rightPost.position.set(postSpacing / 2, postHeight / 2, 0)
+
+    const signTexture = this.createSignTexture()
+    const signMaterial = new THREE.MeshLambertMaterial({ map: signTexture })
 
     const sign = new THREE.Mesh(
       new THREE.BoxGeometry(signWidth, signHeight, signDepth),
       signMaterial
     )
     sign.position.y = postHeight - signHeight / 2
+    sign.position.z = signDepth
 
-    parts.set('post', post)
+    parts.set('leftPost', leftPost)
+    parts.set('rightPost', rightPost)
     parts.set('sign', sign)
-    root.add(post, sign)
+    root.add(leftPost, rightPost, sign)
+  }
+
+  private createSignTexture(): THREE.CanvasTexture {
+    const canvas = document.createElement('canvas')
+    const width = 256
+    const height = 128
+    canvas.width = width
+    canvas.height = height
+
+    const ctx = canvas.getContext('2d')!
+
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, width, height)
+
+    const stripeHeight = 24
+    ctx.fillStyle = '#2244aa'
+    ctx.fillRect(0, height - stripeHeight, width, stripeHeight)
+
+    ctx.fillStyle = '#cc2222'
+    ctx.font = 'bold 72px sans-serif'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('FUN', width / 2, (height - stripeHeight) / 2)
+
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.colorSpace = THREE.SRGBColorSpace
+    return texture
   }
 
   dispose(geometry: GeometryParts): void {

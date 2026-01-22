@@ -101,7 +101,7 @@ export class ObstacleManager {
       obstacle.group.position.z += OBSTACLE_OWN_VELOCITY * delta
 
       const worldZ = obstacle.group.position.z + containerZ
-      if (worldZ > SpawnConfig.OBSTACLE_DESPAWN_Z) {
+      if (worldZ > SpawnConfig.DESPAWN_Z) {
         const pool = this.pools.get(obstacle.type)
         if (pool) {
           pool.release(obstacle)
@@ -124,7 +124,7 @@ export class ObstacleManager {
     const containerZ = (this.container as THREE.Group).position.z
     obstacle.lane = Math.random() < 0.5 ? 'left' : 'right'
     obstacle.group.position.x = obstacle.lane === 'left' ? PhysicsConfig.LANE_LEFT_X : PhysicsConfig.LANE_RIGHT_X
-    obstacle.group.position.z = SpawnConfig.OBSTACLE_SPAWN_Z - containerZ
+    obstacle.group.position.z = SpawnConfig.SPAWN_Z - containerZ
     this.activeObstacles.push(obstacle)
   }
 

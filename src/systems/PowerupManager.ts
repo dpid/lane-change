@@ -99,7 +99,7 @@ export class PowerupManager {
       powerup.group.rotation.y = powerup.rotation
 
       const worldZ = powerup.group.position.z + containerZ
-      if (worldZ > SpawnConfig.OBSTACLE_DESPAWN_Z) {
+      if (worldZ > SpawnConfig.DESPAWN_Z) {
         this.pool.release(powerup)
         this.activePowerups.splice(i, 1)
       }
@@ -115,7 +115,7 @@ export class PowerupManager {
     powerup.group.position.x = powerup.lane === 'left' ? PhysicsConfig.LANE_LEFT_X : PhysicsConfig.LANE_RIGHT_X
     const RIDER_HEIGHT = 0.8
     powerup.group.position.y = RIDER_HEIGHT
-    powerup.group.position.z = SpawnConfig.OBSTACLE_SPAWN_Z - containerZ
+    powerup.group.position.z = SpawnConfig.SPAWN_Z - containerZ
     this.activePowerups.push(powerup)
   }
 

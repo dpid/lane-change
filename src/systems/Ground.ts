@@ -84,16 +84,16 @@ export class Ground {
 
   update(_delta: number): void {
     const containerZ = (this.worldContainer as THREE.Group).position.z
-    const wrapDistance = SpawnConfig.LANE_MARKING_WRAP_THRESHOLD - SpawnConfig.LANE_MARKING_RESET_Z
+    const wrapDistance = SpawnConfig.DESPAWN_Z - SpawnConfig.SPAWN_Z
 
     this.laneMarkings.children.forEach((dash) => {
-      while (dash.position.z + containerZ > SpawnConfig.LANE_MARKING_WRAP_THRESHOLD) {
+      while (dash.position.z + containerZ > SpawnConfig.DESPAWN_Z) {
         dash.position.z -= wrapDistance
       }
     })
 
     this.edgeLines.children.forEach((line) => {
-      while (line.position.z + containerZ > SpawnConfig.LANE_MARKING_WRAP_THRESHOLD) {
+      while (line.position.z + containerZ > SpawnConfig.DESPAWN_Z) {
         line.position.z -= wrapDistance
       }
     })
