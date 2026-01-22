@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { PhysicsConfig, SpawnConfig } from '../config'
+import { AnimationConfig, PhysicsConfig, SpawnConfig } from '../config'
 import { PowerupFactory, PowerupType, type GeometryParts } from '../factories'
 import { ObjectPool, type PooledEntity } from '../pooling'
 
@@ -44,9 +44,8 @@ class Powerup implements PooledEntity {
 
   getBoundingBox(): THREE.Box3 {
     const box = new THREE.Box3().setFromObject(this.group)
-    const GENEROUS_EXPANSION = 0.15
-    box.min.subScalar(GENEROUS_EXPANSION)
-    box.max.addScalar(GENEROUS_EXPANSION)
+    box.min.subScalar(PhysicsConfig.COLLECTION_EXPANSION)
+    box.max.addScalar(PhysicsConfig.COLLECTION_EXPANSION)
     return box
   }
 }
@@ -88,12 +87,11 @@ export class PowerupManager {
       this.spawnTimer = 0
     }
 
-    const COIN_ROTATION_SPEED = 3
     for (let i = this.activePowerups.length - 1; i >= 0; i--) {
       const powerup = this.activePowerups[i]
       powerup.group.position.z += scrollSpeed * delta
 
-      powerup.rotation += COIN_ROTATION_SPEED * delta
+      powerup.rotation += AnimationConfig.COIN_ROTATION_SPEED * delta
       powerup.group.rotation.y = powerup.rotation
 
       if (powerup.group.position.z > SpawnConfig.OBSTACLE_DESPAWN_Z) {

@@ -42,9 +42,8 @@ class Obstacle implements PooledEntity {
 
   getBoundingBox(): THREE.Box3 {
     const box = new THREE.Box3().setFromObject(this.group)
-    const SHRINK_AMOUNT = 0.1
-    box.min.addScalar(SHRINK_AMOUNT)
-    box.max.subScalar(SHRINK_AMOUNT)
+    box.min.addScalar(PhysicsConfig.COLLISION_SHRINK)
+    box.max.subScalar(PhysicsConfig.COLLISION_SHRINK)
     return box
   }
 }

@@ -13,7 +13,10 @@ export const PhysicsConfig = {
 
   CRASH_POP_VELOCITY: 6,
   CRASH_FALL_Y: -5,
-  CRASH_SPIN_SPEED: 15
+  CRASH_SPIN_SPEED: 15,
+
+  COLLISION_SHRINK: 0.1,
+  COLLECTION_EXPANSION: 0.15
 } as const
 
 export type PhysicsConfigType = typeof PhysicsConfig

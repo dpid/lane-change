@@ -8,9 +8,6 @@ interface BackgroundLayer {
   initialZ: number
 }
 
-const WRAP_DISTANCE = 80
-const SPAWN_RANGE = 60
-
 export class Background {
   private scene: THREE.Scene
   private distantLayer!: BackgroundLayer
@@ -62,12 +59,12 @@ export class Background {
 
     for (let i = 0; i < buildingCount; i++) {
       const leftBuilding = this.createBuilding(15, 30)
-      leftBuilding.position.set(-SpawnConfig.DISTANT_BUILDINGS_X, 0, zStart + i * (SPAWN_RANGE / buildingCount))
+      leftBuilding.position.set(-SpawnConfig.DISTANT_BUILDINGS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / buildingCount))
       this.scene.add(leftBuilding)
       groups.push(leftBuilding)
 
       const rightBuilding = this.createBuilding(15, 30)
-      rightBuilding.position.set(SpawnConfig.DISTANT_BUILDINGS_X, 0, zStart + i * (SPAWN_RANGE / buildingCount))
+      rightBuilding.position.set(SpawnConfig.DISTANT_BUILDINGS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / buildingCount))
       this.scene.add(rightBuilding)
       groups.push(rightBuilding)
     }
@@ -86,12 +83,12 @@ export class Background {
 
     for (let i = 0; i < buildingCount; i++) {
       const leftBuilding = this.createBuilding(8, 20)
-      leftBuilding.position.set(-SpawnConfig.MID_BUILDINGS_X, 0, zStart + i * (SPAWN_RANGE / buildingCount))
+      leftBuilding.position.set(-SpawnConfig.MID_BUILDINGS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / buildingCount))
       this.scene.add(leftBuilding)
       groups.push(leftBuilding)
 
       const rightBuilding = this.createBuilding(8, 20)
-      rightBuilding.position.set(SpawnConfig.MID_BUILDINGS_X, 0, zStart + i * (SPAWN_RANGE / buildingCount))
+      rightBuilding.position.set(SpawnConfig.MID_BUILDINGS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / buildingCount))
       this.scene.add(rightBuilding)
       groups.push(rightBuilding)
     }
@@ -111,12 +108,12 @@ export class Background {
 
     for (let i = 0; i < objectCount; i++) {
       const leftObject = this.createNearObject(sceneryFactory)
-      leftObject.position.set(-SpawnConfig.NEAR_OBJECTS_X, 0, zStart + i * (SPAWN_RANGE / objectCount))
+      leftObject.position.set(-SpawnConfig.NEAR_OBJECTS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / objectCount))
       this.scene.add(leftObject)
       groups.push(leftObject)
 
       const rightObject = this.createNearObject(sceneryFactory)
-      rightObject.position.set(SpawnConfig.NEAR_OBJECTS_X, 0, zStart + i * (SPAWN_RANGE / objectCount))
+      rightObject.position.set(SpawnConfig.NEAR_OBJECTS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / objectCount))
       this.scene.add(rightObject)
       groups.push(rightObject)
     }
@@ -201,8 +198,8 @@ export class Background {
     for (const group of layer.groups) {
       group.position.z += moveDistance
 
-      if (group.position.z > WRAP_DISTANCE / 2) {
-        group.position.z -= WRAP_DISTANCE
+      if (group.position.z > SpawnConfig.BACKGROUND_WRAP_DISTANCE / 2) {
+        group.position.z -= SpawnConfig.BACKGROUND_WRAP_DISTANCE
       }
     }
   }
