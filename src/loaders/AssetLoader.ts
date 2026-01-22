@@ -18,10 +18,10 @@ interface CachedModel {
 }
 
 const MODEL_PATHS: Record<ModelType, string> = {
-  'motorcycle': '/models/motorcycle.vox',
-  'car': '/models/car-grey.vox',
-  'truck': '/models/truck.vox',
-  'semi-truck': '/models/semi-truck.vox'
+  'motorcycle': './models/motorcycle.vox',
+  'car': './models/car-grey.vox',
+  'truck': './models/truck.vox',
+  'semi-truck': './models/semi-truck.vox'
 }
 
 export class AssetLoader {
