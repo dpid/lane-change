@@ -54,16 +54,25 @@ npm run preview
 ```
 src/
 ├── main.ts          # Entry point
-├── Game.ts          # Main game loop
-├── config/          # Game constants
+├── Game.ts          # Main game loop and state management
+├── config/          # Game constants (physics, spawn, animation)
 ├── controllers/     # Motorcycle control
-├── factories/       # Entity creation
-├── systems/         # Game systems (obstacles, powerups, background)
+├── factories/       # Entity creation (obstacles, powerups, scenery)
+├── systems/         # Game systems
+│   ├── ScrollManager.ts    # World container and scroll control
+│   ├── ObstacleManager.ts  # Obstacle spawning and collision
+│   ├── PowerupManager.ts   # Coin spawning and collection
+│   ├── Background.ts       # Buildings and scenery
+│   └── Ground.ts           # Road and lane markings
 ├── animation/       # Visual animations
-├── input/           # Input handling
-├── pooling/         # Object pooling
+├── input/           # Input handling (keyboard, mouse, touch)
+├── pooling/         # Object pooling for performance
 └── ui/              # User interface
 ```
+
+## Architecture
+
+The game uses a world scroll container pattern. A `ScrollManager` owns a container that holds all scrolling content. When playing, the container scrolls forward. When the player dies, the container stops but obstacles continue moving with their own velocity (appearing to drive off into the distance).
 
 ## License
 
