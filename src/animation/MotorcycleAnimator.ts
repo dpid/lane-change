@@ -121,9 +121,7 @@ export class MotorcycleAnimator implements AnimationController {
 
   private updateDying(delta: number, _context: MotorcycleAnimationContext): void {
     if (this.bodyPivot) {
-      this.bodyPivot.rotation.x += delta * PhysicsConfig.CRASH_SPIN_SPEED * 0.5
-      this.bodyPivot.rotation.y += delta * PhysicsConfig.CRASH_SPIN_SPEED * 0.7
-      this.bodyPivot.rotation.z += delta * PhysicsConfig.CRASH_SPIN_SPEED
+      this.bodyPivot.rotation.y += delta * PhysicsConfig.CRASH_SPIN_SPEED
     }
   }
 

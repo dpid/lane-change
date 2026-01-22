@@ -24,6 +24,7 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
   private jumpVelocity: number = 0
   private groundY: number = 0
   private dyingTime: number = 0
+  private exitDirection: 1 | -1 = 1
 
   get state(): CharacterState {
     return this._state
@@ -117,6 +118,7 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this.targetLane = null
     this.isLaneSwitching = false
     this.laneProgress = 0
+    this.exitDirection = 1
     this.rebuildCharacter()
     this.animator.reset()
   }
@@ -147,6 +149,7 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this.animator.setState(AnimationState.DYING)
     this.dyingTime = 0
     this.jumpVelocity = PhysicsConfig.CRASH_POP_VELOCITY
+    this.exitDirection = this.currentLane === 'left' ? -1 : 1
     this.shadow.visible = false
     this.tintRed()
     this.renderOnTop()
@@ -262,6 +265,7 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this.dyingTime += delta
     this.jumpVelocity -= PhysicsConfig.GRAVITY * delta
     this._group.position.y += this.jumpVelocity * delta
+    this._group.position.x += this.exitDirection * PhysicsConfig.CRASH_EXIT_VELOCITY_X * delta
 
     const context: MotorcycleAnimationContext = {
       targetLane: null,
@@ -271,7 +275,7 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     }
     this.animator.update(delta, context)
 
-    if (this._group.position.y < PhysicsConfig.CRASH_FALL_Y) {
+    if (Math.abs(this._group.position.x) > PhysicsConfig.CRASH_EXIT_X) {
       this._state = CharacterState.IDLE
       this.emit('dieComplete')
     }
