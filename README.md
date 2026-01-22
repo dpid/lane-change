@@ -60,8 +60,7 @@ src/
 ├── factories/       # Entity creation (obstacles, powerups, scenery)
 ├── systems/         # Game systems
 │   ├── ScrollManager.ts    # World container and scroll control
-│   ├── ObstacleManager.ts  # Obstacle spawning and collision
-│   ├── PowerupManager.ts   # Coin spawning and collection
+│   ├── ItemManager.ts      # Item spawning and collision (deck-based)
 │   ├── Background.ts       # Sky and roadside signs (pooled)
 │   └── Ground.ts           # Road, grass, lane markings (pooled)
 ├── animation/       # Visual animations
@@ -74,7 +73,7 @@ src/
 
 The game uses a world scroll container pattern. A `ScrollManager` owns a container that holds all scrolling content. When playing, the container scrolls forward. When the player dies, the container stops but obstacles continue moving with their own velocity (appearing to drive off into the distance).
 
-All spawned entities (obstacles, powerups, lane markings, signs) use object pooling with a spawn/despawn pattern to avoid garbage collection pressure.
+All spawned entities (items, lane markings, signs) use object pooling with a spawn/despawn pattern to avoid garbage collection pressure. Items are spawned using a deck system that draws from a shuffled deck and reshuffles when exhausted, ensuring consistent distribution with varied order.
 
 ## License
 

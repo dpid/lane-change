@@ -30,9 +30,17 @@ scene
 ### Object Pooling
 
 All spawned entities use object pools to avoid GC pressure. Pools pre-allocate objects and reuse them via acquire/release:
-- Obstacles and powerups spawn at `SPAWN_Z` and despawn at `DESPAWN_Z`
+- Items (obstacles and coins) spawn at `SPAWN_Z` and despawn at `DESPAWN_Z`
 - Lane dashes, edge lines, and roadside signs follow the same pattern
 - Spawn intervals are calculated from element spacing divided by scroll speed
+
+### Spawn Deck System
+
+Items are spawned using a deck-based system (`SpawnDeck` in `ItemManager.ts`):
+- A deck is built from `ItemDefinitions` card counts (e.g., 80 obstacles, 30 coins, 10 gaps)
+- Cards are drawn and placed in a discard pile
+- When the deck is empty, the discard pile is shuffled back into the deck
+- This ensures consistent item distribution while varying order each cycle
 
 ### Input System
 
@@ -42,8 +50,7 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 
 - `src/Game.ts` - Main game loop and state management
 - `src/systems/ScrollManager.ts` - World container and scroll control
-- `src/systems/ObstacleManager.ts` - Obstacle spawning, pooling, collision
-- `src/systems/PowerupManager.ts` - Coin spawning and collection
+- `src/systems/ItemManager.ts` - Item spawning, pooling, collision (deck-based)
 - `src/systems/Ground.ts` - Road, grass, lane dashes, edge lines (pooled)
 - `src/systems/Background.ts` - Sky and roadside signs (pooled)
 - `src/config/` - All magic numbers extracted to config files
