@@ -96,7 +96,7 @@ export class Background {
       side: THREE.DoubleSide
     })
     this.sky = new THREE.Mesh(skyGeometry, skyMaterial)
-    this.sky.position.set(0, 20, -80)
+    this.sky.position.set(0, 20, -130)
     this.scene.add(this.sky)
   }
 

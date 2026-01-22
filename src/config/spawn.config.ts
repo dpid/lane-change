@@ -1,7 +1,7 @@
 export const SpawnConfig = {
-  FAR_BOUND_Z: -40,
+  FAR_BOUND_Z: -90,
   NEAR_BOUND_Z: 10,
-  FAR_SPAWN_Z: -38,
+  FAR_SPAWN_Z: -88,
   NEAR_SPAWN_Z: 8,
 
   ITEM_SPAWN_INTERVAL: 1.5,
@@ -19,7 +19,7 @@ export const SpawnConfig = {
   SIGN_SPAWN_INTERVAL: 3.0,
 
   ROAD_WIDTH: 8,
-  ROAD_LENGTH: 100
+  ROAD_LENGTH: 150
 } as const
 
 export type SpawnConfigType = typeof SpawnConfig

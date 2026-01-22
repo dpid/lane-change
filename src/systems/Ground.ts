@@ -143,7 +143,8 @@ export class Ground {
     const roadMaterial = new THREE.MeshLambertMaterial({ color: EnvironmentColors.road })
     const roadPlane = new THREE.Mesh(roadGeometry, roadMaterial)
     roadPlane.rotation.x = -Math.PI / 2
-    roadPlane.position.y = 0
+    const centerZ = (SpawnConfig.FAR_BOUND_Z + SpawnConfig.NEAR_BOUND_Z) / 2
+    roadPlane.position.set(0, 0, centerZ)
     this.scene.add(roadPlane)
 
     this.createGrass()
@@ -153,15 +154,16 @@ export class Ground {
     const grassWidth = 50
     const grassGeometry = new THREE.PlaneGeometry(grassWidth, SpawnConfig.ROAD_LENGTH)
     const grassMaterial = new THREE.MeshLambertMaterial({ color: EnvironmentColors.grass })
+    const centerZ = (SpawnConfig.FAR_BOUND_Z + SpawnConfig.NEAR_BOUND_Z) / 2
 
     const leftGrass = new THREE.Mesh(grassGeometry, grassMaterial)
     leftGrass.rotation.x = -Math.PI / 2
-    leftGrass.position.set(-(SpawnConfig.ROAD_WIDTH / 2 + grassWidth / 2), -0.01, 0)
+    leftGrass.position.set(-(SpawnConfig.ROAD_WIDTH / 2 + grassWidth / 2), -0.01, centerZ)
     this.scene.add(leftGrass)
 
     const rightGrass = new THREE.Mesh(grassGeometry, grassMaterial)
     rightGrass.rotation.x = -Math.PI / 2
-    rightGrass.position.set(SpawnConfig.ROAD_WIDTH / 2 + grassWidth / 2, -0.01, 0)
+    rightGrass.position.set(SpawnConfig.ROAD_WIDTH / 2 + grassWidth / 2, -0.01, centerZ)
     this.scene.add(rightGrass)
   }
 
