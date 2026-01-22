@@ -135,6 +135,7 @@ export class ItemManager {
     const MAX_POOL_SIZE = 15
 
     for (const geometryType of Object.values(GeometryType)) {
+      if (geometryType === GeometryType.NONE) continue
       const pool = new ObjectPool<Item>(
         () => {
           const item = new Item(geometryType, this.factory)
@@ -177,6 +178,7 @@ export class ItemManager {
 
   private spawnItem(): void {
     const geometryType = this.spawnDeck.draw()
+    if (geometryType === GeometryType.NONE) return
     const definition = ItemDefinitions[geometryType]
     const pool = this.pools.get(geometryType)
     if (!pool) return
