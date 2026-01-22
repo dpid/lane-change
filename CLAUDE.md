@@ -14,6 +14,7 @@ scene
 ├── road plane (fixed)
 ├── grass planes (fixed, flanking road)
 ├── motorcycle + shadow (fixed position, lane switching only)
+├── smoke particles (pooled, emitted during gameplay)
 └── worldContainer (scrolls during gameplay)
     ├── roadside signs (pooled, spawn/despawn)
     ├── lane markings + edge lines (pooled, spawn/despawn)
@@ -76,6 +77,15 @@ Vehicles spawn with randomly selected body colors from `VehicleTintColors`. The 
 
 Input providers emit actions through InputManager. Currently supports keyboard, mouse, and touch.
 
+### Smoke Particle System
+
+`SmokeSystem` provides exhaust smoke behind the motorcycle using a simple array pool:
+- Particles are box meshes with transparent materials
+- Continuous emission during PLAYING state, synced to scroll speed
+- Particles drift toward camera (+Z) matching world scroll direction
+- Hemispherical crash burst on death, intensity scales with scroll speed
+- Config in `src/config/particles.config.ts`
+
 ## Key Files
 
 - `src/Game.ts` - Main game loop and state management (async init)
@@ -84,6 +94,7 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 - `src/systems/ItemManager.ts` - Item spawning, pooling, collision (deck-based)
 - `src/systems/Ground.ts` - Road, grass, lane dashes, edge lines (pooled)
 - `src/systems/Background.ts` - Sky and roadside signs (pooled)
+- `src/effects/SmokeSystem.ts` - Exhaust smoke particles (pooled)
 - `src/config/` - All magic numbers extracted to config files
 - `public/models/` - MagicaVoxel .vox assets
 

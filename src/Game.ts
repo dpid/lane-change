@@ -9,6 +9,7 @@ import { InputManager } from './input/InputManager'
 import { PlayerInputProvider } from './input/PlayerInputProvider'
 import { InputActionType } from './input/InputAction'
 import { AssetLoader } from './loaders'
+import { SmokeSystem } from './effects'
 import { EnvironmentColors, FogConfig } from './config'
 
 export enum GameState {
@@ -36,6 +37,7 @@ export class Game {
   private scrollManager!: ScrollManager
   private ui!: UI
   private inputManager!: InputManager
+  private smokeSystem!: SmokeSystem
 
   private state: GameState = GameState.MENU
   private score: number = 0
@@ -96,6 +98,8 @@ export class Game {
     this.background = new Background(this.scene, this.scrollManager)
     this.ground = new Ground(this.scene, this.scrollManager)
     this.motorcycle = new MotorcycleController(this.scene)
+    this.smokeSystem = new SmokeSystem(this.scene)
+    this.smokeSystem.setMotorcycle(this.motorcycle.group)
     this.itemManager = new ItemManager(this.scrollManager.worldContainer, this.scrollManager)
     this.ui = new UI()
     this.inputManager = new InputManager()
@@ -146,6 +150,7 @@ export class Game {
     this.ground.reset()
     this.itemManager.reset()
     this.motorcycle.reset()
+    this.smokeSystem.reset()
     this.startGame()
   }
 
@@ -187,6 +192,7 @@ export class Game {
       }
 
       if (result.killed && !this.motorcycle.isDead()) {
+        this.smokeSystem.emitCrashBurst(this.scrollManager.getScrollSpeed())
         this.motorcycle.loseHitpoint(this.scrollManager.getScrollSpeed())
         this.scrollManager.stopScrolling()
         this.scrollManager.resetProgression()
@@ -198,6 +204,9 @@ export class Game {
     if (this.state === GameState.DROPPING || this.state === GameState.PLAYING || this.state === GameState.DYING) {
       this.motorcycle.update(delta, this.scrollManager.getSpeedMultiplier())
     }
+
+    const isEmitting = this.state === GameState.PLAYING
+    this.smokeSystem.update(delta, isEmitting, this.scrollManager.getScrollSpeed())
 
     this.renderer.render(this.scene, this.camera)
   }

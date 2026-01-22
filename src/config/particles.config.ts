@@ -1,0 +1,29 @@
+export const ParticlesConfig = {
+  POOL_SIZE: 100,
+  PARTICLE_SIZE: 0.15,
+  COLOR: 0xaaaaaa,
+
+  EMISSION_INTERVAL: 0.08,
+  LIFETIME_MIN: 0.8,
+  LIFETIME_MAX: 1.2,
+
+  VELOCITY_SCROLL_FACTOR: 0.5,
+  VELOCITY_Y_DRIFT: 0.3,
+  VELOCITY_SPREAD: 0.3,
+
+  GRAVITY: -0.5,
+  DRAG: 0.98,
+
+  INITIAL_OPACITY: 0.35,
+  OPACITY_RANDOMNESS: 0.15,
+  SCALE_GROWTH: 1.5,
+
+  EMISSION_OFFSET_X: 0,
+  EMISSION_OFFSET_Y: 0.6,
+  EMISSION_OFFSET_Z: 0.5,
+  EMISSION_RANDOMNESS: 0.15,
+
+  CRASH_BURST_COUNT: 20
+} as const
+
+export type ParticlesConfigType = typeof ParticlesConfig

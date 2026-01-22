@@ -67,6 +67,8 @@ src/
 │   ├── ItemManager.ts      # Item spawning and collision (deck-based)
 │   ├── Background.ts       # Sky and roadside signs (pooled)
 │   └── Ground.ts           # Road, grass, lane markings (pooled)
+├── effects/         # Visual effects
+│   └── SmokeSystem.ts      # Exhaust smoke particles (pooled)
 ├── animation/       # Visual animations
 ├── input/           # Input handling (keyboard, mouse, touch)
 ├── pooling/         # Object pooling for performance
