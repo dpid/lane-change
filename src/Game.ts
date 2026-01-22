@@ -11,6 +11,7 @@ import { InputActionType } from './input/InputAction'
 import { AssetLoader } from './loaders'
 import { SmokeSystem, VoxelBurstSystem } from './effects'
 import { EnvironmentColors, FogConfig } from './config'
+import { PlayFunManager } from './systems/PlayFunManager'
 
 export enum GameState {
   MENU,
@@ -39,6 +40,7 @@ export class Game {
   private inputManager!: InputManager
   private smokeSystem!: SmokeSystem
   private voxelBurstSystem!: VoxelBurstSystem
+  private playFun!: PlayFunManager
 
   private state: GameState = GameState.MENU
   private score: number = 0
@@ -92,6 +94,12 @@ export class Game {
 
   async init(): Promise<void> {
     await AssetLoader.getInstance().loadAll()
+
+    this.playFun = new PlayFunManager()
+    const gameId = import.meta.env.VITE_PLAYFUN_GAME_ID
+    if (gameId) {
+      await this.playFun.init(gameId)
+    }
 
     this.scrollManager = new ScrollManager()
     this.scene.add(this.scrollManager.worldContainer)
@@ -178,13 +186,17 @@ export class Game {
       const result = this.itemManager.checkCollisions(motorcycleBox, currentLane, motorcycleZ)
 
       if (result.passedItems > 0) {
-        this.score += result.passedItems * POINTS_PER_OBSTACLE
+        const obstaclePoints = result.passedItems * POINTS_PER_OBSTACLE
+        this.score += obstaclePoints
         this.ui.updateScore(this.score)
+        this.playFun.addPoints(obstaclePoints)
       }
 
       if (result.scoreItems > 0) {
-        this.score += result.scoreItems * POINTS_PER_COIN
+        const coinPoints = result.scoreItems * POINTS_PER_COIN
+        this.score += coinPoints
         this.ui.updateScore(this.score)
+        this.playFun.addPoints(coinPoints)
       }
 
       if (result.killed && !this.motorcycle.isDead()) {
@@ -197,6 +209,7 @@ export class Game {
           if (this.state !== GameState.GAME_OVER) {
             this.state = GameState.GAME_OVER
             this.ui.showGameOver(this.score)
+            this.playFun.savePoints()
           }
         })
 
