@@ -23,10 +23,27 @@ export class Ground {
     roadPlane.position.y = 0
     this.scene.add(roadPlane)
 
+    this.createGrass()
     this.createLaneMarkings()
     this.createEdgeLines()
     this.worldContainer.add(this.laneMarkings)
     this.worldContainer.add(this.edgeLines)
+  }
+
+  private createGrass(): void {
+    const grassWidth = 50
+    const grassGeometry = new THREE.PlaneGeometry(grassWidth, SpawnConfig.ROAD_LENGTH)
+    const grassMaterial = new THREE.MeshLambertMaterial({ color: EnvironmentColors.grass })
+
+    const leftGrass = new THREE.Mesh(grassGeometry, grassMaterial)
+    leftGrass.rotation.x = -Math.PI / 2
+    leftGrass.position.set(-(SpawnConfig.ROAD_WIDTH / 2 + grassWidth / 2), -0.01, 0)
+    this.scene.add(leftGrass)
+
+    const rightGrass = new THREE.Mesh(grassGeometry, grassMaterial)
+    rightGrass.rotation.x = -Math.PI / 2
+    rightGrass.position.set(SpawnConfig.ROAD_WIDTH / 2 + grassWidth / 2, -0.01, 0)
+    this.scene.add(rightGrass)
   }
 
   private createLaneMarkings(): void {

@@ -9,8 +9,7 @@ export const MotorcycleColors = {
 
 export const ObstacleColors = {
   sedans: [0xff4444, 0x4444ff, 0x44ff44, 0xffff44, 0xff44ff, 0xffffff, 0x888888] as readonly number[],
-  truck: 0xcc8800,
-  oilSlick: 0x1a1a1a
+  truck: 0xcc8800
 } as const
 
 export const PowerupColors = {
@@ -22,12 +21,7 @@ export const EnvironmentColors = {
   skyBottom: 0xb8d4f0,
   road: 0x3a3a3a,
   laneMarking: 0xffffff,
-  buildingBase: 0x5a5a5a,
-  buildingVariant1: 0x6a6a7a,
-  buildingVariant2: 0x4a5a6a,
-  buildingVariant3: 0x7a7a8a,
-  windowLit: 0xffee88,
-  windowDark: 0x2a2a3a
+  grass: 0x4a7c23
 } as const
 
 export type MotorcycleColorsType = typeof MotorcycleColors

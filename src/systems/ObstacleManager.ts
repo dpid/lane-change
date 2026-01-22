@@ -65,7 +65,7 @@ export class ObstacleManager {
   }
 
   private initializePools(): void {
-    const types = [ObstacleType.CAR, ObstacleType.TRUCK, ObstacleType.OIL_SLICK]
+    const types = [ObstacleType.CAR, ObstacleType.TRUCK]
     const INITIAL_POOL_SIZE = 5
     const MAX_POOL_SIZE = 15
 
@@ -112,7 +112,7 @@ export class ObstacleManager {
   }
 
   private spawnObstacle(): void {
-    const types = [ObstacleType.CAR, ObstacleType.TRUCK, ObstacleType.OIL_SLICK]
+    const types = [ObstacleType.CAR, ObstacleType.TRUCK]
     const type = types[Math.floor(Math.random() * types.length)]
 
     const pool = this.pools.get(type)

@@ -4,8 +4,7 @@ import { ObstacleColors } from '../config'
 
 export enum ObstacleType {
   CAR = 'CAR',
-  TRUCK = 'TRUCK',
-  OIL_SLICK = 'OIL_SLICK'
+  TRUCK = 'TRUCK'
 }
 
 export interface ObstacleOptions {
@@ -24,9 +23,6 @@ export class ObstacleFactory implements GeometryFactory<ObstacleOptions> {
         break
       case ObstacleType.TRUCK:
         this.buildTruck(root, parts)
-        break
-      case ObstacleType.OIL_SLICK:
-        this.buildOilSlick(root, parts)
         break
     }
 
@@ -222,27 +218,6 @@ export class ObstacleFactory implements GeometryFactory<ObstacleOptions> {
     wheelsGroup.add(frontLeft, frontRight, rearLeft1, rearRight1, rearLeft2, rearRight2)
 
     root.add(bodyGroup, wheelsGroup)
-  }
-
-  private buildOilSlick(root: THREE.Group, parts: Map<string, THREE.Object3D>): void {
-    const slickHeight = 0.02
-    const material = new THREE.MeshLambertMaterial({
-      color: ObstacleColors.oilSlick,
-      transparent: true,
-      opacity: 0.8
-    })
-
-    const slickWidth = 1.2
-    const slickLength = 1.5
-
-    const slick = new THREE.Mesh(
-      new THREE.BoxGeometry(slickWidth, slickHeight, slickLength),
-      material
-    )
-    slick.position.y = slickHeight / 2
-
-    parts.set('body', slick)
-    root.add(slick)
   }
 
   dispose(geometry: GeometryParts): void {
