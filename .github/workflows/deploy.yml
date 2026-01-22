@@ -32,6 +32,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_PLAYFUN_GAME_ID: ${{ secrets.VITE_PLAYFUN_GAME_ID }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
