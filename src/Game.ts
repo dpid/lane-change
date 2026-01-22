@@ -9,6 +9,7 @@ import { InputManager } from './input/InputManager'
 import { PlayerInputProvider } from './input/PlayerInputProvider'
 import { InputActionType } from './input/InputAction'
 import { AssetLoader } from './loaders'
+import { EnvironmentColors, FogConfig } from './config'
 
 export enum GameState {
   MENU,
@@ -47,13 +48,14 @@ export class Game {
     })
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    this.renderer.setClearColor(0x87ceeb)
+    this.renderer.setClearColor(EnvironmentColors.fog)
 
     if (!canvas) {
       document.body.appendChild(this.renderer.domElement)
     }
 
     this.scene = new THREE.Scene()
+    this.scene.fog = new THREE.Fog(EnvironmentColors.fog, FogConfig.near, FogConfig.far)
 
     const aspect = window.innerWidth / window.innerHeight
     this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 2000)

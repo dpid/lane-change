@@ -21,7 +21,13 @@ export const EnvironmentColors = {
   skyBottom: 0xb8d4f0,
   road: 0x3a3a3a,
   laneMarking: 0xffffff,
-  grass: 0x4a7c23
+  grass: 0x4a7c23,
+  fog: 0xb8d4f0
+} as const
+
+export const FogConfig = {
+  near: -30,
+  far: 100
 } as const
 
 export type MotorcycleColorsType = typeof MotorcycleColors

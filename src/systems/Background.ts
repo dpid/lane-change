@@ -75,28 +75,39 @@ export class Background {
     const skyGeometry = new THREE.PlaneGeometry(200, 100)
     const skyMaterial = new THREE.ShaderMaterial({
       uniforms: {
+        ...THREE.UniformsLib.fog,
         topColor: { value: new THREE.Color(EnvironmentColors.skyTop) },
         bottomColor: { value: new THREE.Color(EnvironmentColors.skyBottom) }
       },
       vertexShader: `
         varying vec2 vUv;
+        varying float vFogDepth;
         void main() {
           vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          vFogDepth = -mvPosition.z;
+          gl_Position = projectionMatrix * mvPosition;
         }
       `,
       fragmentShader: `
         uniform vec3 topColor;
         uniform vec3 bottomColor;
+        uniform vec3 fogColor;
+        uniform float fogNear;
+        uniform float fogFar;
         varying vec2 vUv;
+        varying float vFogDepth;
         void main() {
-          gl_FragColor = vec4(mix(bottomColor, topColor, vUv.y), 1.0);
+          vec3 skyColor = mix(bottomColor, topColor, vUv.y);
+          float fogFactor = smoothstep(fogNear, fogFar, vFogDepth);
+          gl_FragColor = vec4(mix(skyColor, fogColor, fogFactor), 1.0);
         }
       `,
+      fog: true,
       side: THREE.DoubleSide
     })
     this.sky = new THREE.Mesh(skyGeometry, skyMaterial)
-    this.sky.position.set(0, 20, -130)
+    this.sky.position.set(0, 50, -130)
     this.scene.add(this.sky)
   }
 
