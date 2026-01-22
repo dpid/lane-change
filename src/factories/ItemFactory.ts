@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { GeometryFactory, GeometryParts, disposeGeometryParts } from './GeometryFactory'
-import { PowerupColors } from '../config'
+import { PowerupColors, VehicleTintColors } from '../config'
 import { GeometryType } from '../config/items.config'
 import { AssetLoader, ModelType } from '../loaders'
 
@@ -17,6 +17,23 @@ const GEOMETRY_TO_MODEL: Partial<Record<GeometryType, ModelType>> = {
   [GeometryType.CAR]: 'car',
   [GeometryType.TRUCK]: 'truck',
   [GeometryType.SEMI_TRUCK]: 'semi-truck'
+}
+
+const WHITE_THRESHOLD = 0.95
+
+function tintVehicle(group: THREE.Group, color: number): void {
+  group.traverse((child) => {
+    if (!(child instanceof THREE.Mesh)) return
+    if (!child.material) return
+
+    const material = child.material as THREE.MeshStandardMaterial
+    const { r, g, b } = material.color
+
+    if (r > WHITE_THRESHOLD && g > WHITE_THRESHOLD && b > WHITE_THRESHOLD) {
+      child.material = material.clone()
+      ;(child.material as THREE.MeshStandardMaterial).color.set(color)
+    }
+  })
 }
 
 export class ItemFactory implements GeometryFactory<ItemOptions> {
@@ -39,6 +56,9 @@ export class ItemFactory implements GeometryFactory<ItemOptions> {
     voxModel.scale.setScalar(VOX_SCALE)
     voxModel.rotation.y = Math.PI
     voxModel.position.y = VOX_Y_OFFSET
+
+    const colorIndex = Math.floor(Math.random() * VehicleTintColors.length)
+    tintVehicle(voxModel, VehicleTintColors[colorIndex])
 
     parts.set('body', voxModel)
     root.add(voxModel)

@@ -30,6 +30,13 @@ export const FogConfig = {
   far: 100
 } as const
 
+export const VehicleTintColors = [
+  0xffffff,
+  0xe9c46a,
+  0x457b9d,
+  0x2a9d8f
+] as const
+
 export type MotorcycleColorsType = typeof MotorcycleColors
 export type ObstacleColorsType = typeof ObstacleColors
 export type PowerupColorsType = typeof PowerupColors

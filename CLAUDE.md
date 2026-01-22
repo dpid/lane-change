@@ -65,6 +65,13 @@ VOX models (MagicaVoxel format) are loaded via `AssetLoader` singleton at startu
 - `Game.init()` is async to await asset loading
 - Cloned meshes are used for pooled entities to avoid re-parsing
 
+### Vehicle Tinting
+
+Vehicles spawn with randomly selected body colors from `VehicleTintColors`. The tinting system:
+- Detects white/near-white materials (RGB > 0.95 threshold)
+- Clones the material before modifying to avoid affecting other instances
+- Applies tint only to body parts, leaving wheels/windows unchanged
+
 ### Input System
 
 Input providers emit actions through InputManager. Currently supports keyboard, mouse, and touch.

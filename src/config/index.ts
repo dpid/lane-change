@@ -1,5 +1,5 @@
 export { PhysicsConfig } from './physics.config'
 export { SpawnConfig } from './spawn.config'
 export { AnimationConfig } from './animation.config'
-export { MotorcycleColors, ObstacleColors, PowerupColors, EnvironmentColors, FogConfig } from './colors.config'
+export { MotorcycleColors, ObstacleColors, PowerupColors, EnvironmentColors, FogConfig, VehicleTintColors } from './colors.config'
 export * from './items.config'
