@@ -143,6 +143,7 @@ export class Game {
 
   private restartGame(): void {
     this.scrollManager.reset()
+    this.ground.reset()
     this.itemManager.reset()
     this.motorcycle.reset()
     this.startGame()

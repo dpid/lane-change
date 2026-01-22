@@ -244,11 +244,27 @@ export class Ground {
   }
 
   reset(): void {
-    this.dashPool.releaseAll()
-    this.leftEdgePool.releaseAll()
-    this.rightEdgePool.releaseAll()
     this.dashSpawnTimer = 0
     this.edgeSpawnTimer = 0
-    this.populateInitialElements()
+
+    const dashInterval = SpawnConfig.LANE_DASH_LENGTH + SpawnConfig.LANE_DASH_GAP
+    const activeDashes = this.dashPool.getActive()
+    let dashIndex = 0
+    for (let z = SpawnConfig.FAR_BOUND_Z; z <= SpawnConfig.NEAR_BOUND_Z; z += dashInterval) {
+      if (dashIndex < activeDashes.length) {
+        activeDashes[dashIndex].object.position.z = z
+        dashIndex++
+      }
+    }
+
+    const activeLeftEdges = this.leftEdgePool.getActive()
+    const activeRightEdges = this.rightEdgePool.getActive()
+    for (let i = 0; i < activeLeftEdges.length; i++) {
+      const z = SpawnConfig.FAR_BOUND_Z + i * SpawnConfig.EDGE_LINE_SEGMENT_LENGTH
+      activeLeftEdges[i].object.position.z = z
+      if (i < activeRightEdges.length) {
+        activeRightEdges[i].object.position.z = z
+      }
+    }
   }
 }
