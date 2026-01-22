@@ -3,12 +3,11 @@ import { PhysicsConfig, SpawnConfig } from '../config'
 import { ObstacleFactory, ObstacleType, type GeometryParts } from '../factories'
 import { ObjectPool, type PooledEntity } from '../pooling'
 
-const OBSTACLE_OWN_VELOCITY = PhysicsConfig.SCROLL_SPEED * (PhysicsConfig.OBSTACLE_SCROLL_FACTOR - 1)
-
 class Obstacle implements PooledEntity {
   type: ObstacleType
   lane: 'left' | 'right'
   passed: boolean = false
+  velocity: number = 0
   private geometryParts: GeometryParts
   private _active: boolean = false
 
@@ -57,6 +56,7 @@ export class ObstacleManager {
   private activeObstacles: Obstacle[] = []
   private spawnTimer: number = 0
   private spawnInterval: number = SpawnConfig.OBSTACLE_MIN_SPAWN_INTERVAL
+  private spawnDirection: 'toward_camera' | 'toward_horizon' = 'toward_camera'
 
   constructor(container: THREE.Object3D) {
     this.container = container
@@ -98,10 +98,10 @@ export class ObstacleManager {
 
     for (let i = this.activeObstacles.length - 1; i >= 0; i--) {
       const obstacle = this.activeObstacles[i]
-      obstacle.group.position.z += OBSTACLE_OWN_VELOCITY * delta
+      obstacle.group.position.z += obstacle.velocity * delta
 
       const worldZ = obstacle.group.position.z + containerZ
-      if (worldZ > SpawnConfig.DESPAWN_Z) {
+      if (worldZ > SpawnConfig.NEAR_BOUND_Z || worldZ < SpawnConfig.FAR_BOUND_Z) {
         const pool = this.pools.get(obstacle.type)
         if (pool) {
           pool.release(obstacle)
@@ -124,7 +124,15 @@ export class ObstacleManager {
     const containerZ = (this.container as THREE.Group).position.z
     obstacle.lane = Math.random() < 0.5 ? 'left' : 'right'
     obstacle.group.position.x = obstacle.lane === 'left' ? PhysicsConfig.LANE_LEFT_X : PhysicsConfig.LANE_RIGHT_X
-    obstacle.group.position.z = SpawnConfig.SPAWN_Z - containerZ
+
+    const baseVelocity = PhysicsConfig.SCROLL_SPEED * (PhysicsConfig.OBSTACLE_SCROLL_FACTOR - 1)
+    if (this.spawnDirection === 'toward_camera') {
+      obstacle.group.position.z = SpawnConfig.FAR_SPAWN_Z - containerZ
+    } else {
+      obstacle.group.position.z = SpawnConfig.NEAR_SPAWN_Z - containerZ
+    }
+    obstacle.velocity = baseVelocity
+
     this.activeObstacles.push(obstacle)
   }
 
@@ -155,6 +163,10 @@ export class ObstacleManager {
     return count
   }
 
+  setSpawnDirection(direction: 'toward_camera' | 'toward_horizon'): void {
+    this.spawnDirection = direction
+  }
+
   reset(): void {
     for (const obstacle of this.activeObstacles) {
       const pool = this.pools.get(obstacle.type)
@@ -164,6 +176,7 @@ export class ObstacleManager {
     }
     this.activeObstacles = []
     this.spawnTimer = 0
+    this.spawnDirection = 'toward_camera'
   }
 
   getPoolStats(): Map<ObstacleType, { available: number; active: number; total: number }> {

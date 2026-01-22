@@ -99,7 +99,7 @@ export class Background {
 
   private spawnInitialSign(): void {
     const containerZ = (this.worldContainer as THREE.Group).position.z
-    this.spawnSignAt(SpawnConfig.SPAWN_Z - containerZ)
+    this.spawnSignAt(SpawnConfig.FAR_BOUND_Z - containerZ)
   }
 
   private spawnSignAt(localZ: number): void {
@@ -116,13 +116,13 @@ export class Background {
 
     this.signSpawnTimer += delta
     if (this.signSpawnTimer >= SpawnConfig.SIGN_SPAWN_INTERVAL) {
-      this.spawnSignAt(SpawnConfig.SPAWN_Z - containerZ)
+      this.spawnSignAt(SpawnConfig.FAR_BOUND_Z - containerZ)
       this.signSpawnTimer = 0
     }
 
     for (const sign of this.signPool.getActive()) {
       const worldZ = sign.object.position.z + containerZ
-      if (worldZ > SpawnConfig.DESPAWN_Z) {
+      if (worldZ > SpawnConfig.NEAR_BOUND_Z) {
         this.signPool.release(sign)
       }
     }

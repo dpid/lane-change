@@ -186,6 +186,8 @@ export class Game {
       if (hasCollision && !this.motorcycle.isDead()) {
         this.motorcycle.loseHitpoint(this.scrollManager.getScrollSpeed())
         this.scrollManager.stopScrolling()
+        this.obstacleManager.setSpawnDirection('toward_horizon')
+        this.powerupManager.setSpawnDirection('toward_horizon')
         this.state = GameState.DYING
       }
     }

@@ -166,11 +166,11 @@ export class Ground {
     const containerZ = (this.worldContainer as THREE.Group).position.z
     const dashInterval = SpawnConfig.LANE_DASH_LENGTH + SpawnConfig.LANE_DASH_GAP
 
-    for (let z = SpawnConfig.SPAWN_Z; z <= SpawnConfig.DESPAWN_Z; z += dashInterval) {
+    for (let z = SpawnConfig.FAR_BOUND_Z; z <= SpawnConfig.NEAR_BOUND_Z; z += dashInterval) {
       this.spawnDashAt(z - containerZ)
     }
 
-    for (let z = SpawnConfig.SPAWN_Z; z <= SpawnConfig.DESPAWN_Z; z += SpawnConfig.EDGE_LINE_SEGMENT_LENGTH) {
+    for (let z = SpawnConfig.FAR_BOUND_Z; z <= SpawnConfig.NEAR_BOUND_Z; z += SpawnConfig.EDGE_LINE_SEGMENT_LENGTH) {
       this.spawnEdgeLinesAt(z - containerZ)
     }
   }
@@ -201,13 +201,13 @@ export class Ground {
 
     this.dashSpawnTimer += delta
     if (this.dashSpawnTimer >= SpawnConfig.LANE_DASH_SPAWN_INTERVAL) {
-      this.spawnDashAt(SpawnConfig.SPAWN_Z - containerZ)
+      this.spawnDashAt(SpawnConfig.FAR_BOUND_Z - containerZ)
       this.dashSpawnTimer = 0
     }
 
     this.edgeSpawnTimer += delta
     if (this.edgeSpawnTimer >= SpawnConfig.EDGE_LINE_SPAWN_INTERVAL) {
-      this.spawnEdgeLinesAt(SpawnConfig.SPAWN_Z - containerZ)
+      this.spawnEdgeLinesAt(SpawnConfig.FAR_BOUND_Z - containerZ)
       this.edgeSpawnTimer = 0
     }
 
@@ -217,21 +217,21 @@ export class Ground {
   private despawnElements(containerZ: number): void {
     for (const dash of this.dashPool.getActive()) {
       const worldZ = dash.object.position.z + containerZ
-      if (worldZ > SpawnConfig.DESPAWN_Z) {
+      if (worldZ > SpawnConfig.NEAR_BOUND_Z) {
         this.dashPool.release(dash)
       }
     }
 
     for (const segment of this.leftEdgePool.getActive()) {
       const worldZ = segment.object.position.z + containerZ
-      if (worldZ > SpawnConfig.DESPAWN_Z) {
+      if (worldZ > SpawnConfig.NEAR_BOUND_Z) {
         this.leftEdgePool.release(segment)
       }
     }
 
     for (const segment of this.rightEdgePool.getActive()) {
       const worldZ = segment.object.position.z + containerZ
-      if (worldZ > SpawnConfig.DESPAWN_Z) {
+      if (worldZ > SpawnConfig.NEAR_BOUND_Z) {
         this.rightEdgePool.release(segment)
       }
     }

@@ -3,12 +3,11 @@ import { AnimationConfig, PhysicsConfig, SpawnConfig } from '../config'
 import { PowerupFactory, PowerupType, type GeometryParts } from '../factories'
 import { ObjectPool, type PooledEntity } from '../pooling'
 
-const POWERUP_OWN_VELOCITY = PhysicsConfig.SCROLL_SPEED * (PhysicsConfig.OBSTACLE_SCROLL_FACTOR - 1)
-
 class Powerup implements PooledEntity {
   type: PowerupType
   lane: 'left' | 'right'
   collected: boolean = false
+  velocity: number = 0
   private geometryParts: GeometryParts
   private _active: boolean = false
   rotation: number = 0
@@ -58,6 +57,7 @@ export class PowerupManager {
   private pool!: ObjectPool<Powerup>
   private activePowerups: Powerup[] = []
   private spawnTimer: number = 0
+  private spawnDirection: 'toward_camera' | 'toward_horizon' = 'toward_camera'
 
   constructor(container: THREE.Object3D) {
     this.container = container
@@ -93,13 +93,13 @@ export class PowerupManager {
 
     for (let i = this.activePowerups.length - 1; i >= 0; i--) {
       const powerup = this.activePowerups[i]
-      powerup.group.position.z += POWERUP_OWN_VELOCITY * delta
+      powerup.group.position.z += powerup.velocity * delta
 
       powerup.rotation += AnimationConfig.COIN_ROTATION_SPEED * delta
       powerup.group.rotation.y = powerup.rotation
 
       const worldZ = powerup.group.position.z + containerZ
-      if (worldZ > SpawnConfig.DESPAWN_Z) {
+      if (worldZ > SpawnConfig.NEAR_BOUND_Z || worldZ < SpawnConfig.FAR_BOUND_Z) {
         this.pool.release(powerup)
         this.activePowerups.splice(i, 1)
       }
@@ -115,7 +115,15 @@ export class PowerupManager {
     powerup.group.position.x = powerup.lane === 'left' ? PhysicsConfig.LANE_LEFT_X : PhysicsConfig.LANE_RIGHT_X
     const RIDER_HEIGHT = 0.8
     powerup.group.position.y = RIDER_HEIGHT
-    powerup.group.position.z = SpawnConfig.SPAWN_Z - containerZ
+
+    const baseVelocity = PhysicsConfig.SCROLL_SPEED * (PhysicsConfig.OBSTACLE_SCROLL_FACTOR - 1)
+    if (this.spawnDirection === 'toward_camera') {
+      powerup.group.position.z = SpawnConfig.FAR_SPAWN_Z - containerZ
+    } else {
+      powerup.group.position.z = SpawnConfig.NEAR_SPAWN_Z - containerZ
+    }
+    powerup.velocity = baseVelocity
+
     this.activePowerups.push(powerup)
   }
 
@@ -140,12 +148,17 @@ export class PowerupManager {
     return collectedCount
   }
 
+  setSpawnDirection(direction: 'toward_camera' | 'toward_horizon'): void {
+    this.spawnDirection = direction
+  }
+
   reset(): void {
     for (const powerup of this.activePowerups) {
       this.pool.release(powerup)
     }
     this.activePowerups = []
     this.spawnTimer = 0
+    this.spawnDirection = 'toward_camera'
   }
 
   getPoolStats(): { available: number; active: number; total: number } {
