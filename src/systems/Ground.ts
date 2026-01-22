@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { EnvironmentColors, SpawnConfig } from '../config'
 import { ObjectPool, type PooledEntity } from '../pooling'
+import type { ScrollManager } from './ScrollManager'
 
 class LaneDash implements PooledEntity {
   private mesh: THREE.Mesh
@@ -72,6 +73,7 @@ const EDGE_LINE_POOL_SIZE = 15
 export class Ground {
   private scene: THREE.Scene
   private worldContainer: THREE.Object3D
+  private scrollManager: ScrollManager
 
   private dashPool: ObjectPool<LaneDash>
   private leftEdgePool: ObjectPool<EdgeLineSegment>
@@ -87,9 +89,10 @@ export class Ground {
   private leftEdgeX: number
   private rightEdgeX: number
 
-  constructor(scene: THREE.Scene, worldContainer: THREE.Object3D) {
+  constructor(scene: THREE.Scene, scrollManager: ScrollManager) {
     this.scene = scene
-    this.worldContainer = worldContainer
+    this.scrollManager = scrollManager
+    this.worldContainer = scrollManager.worldContainer
 
     this.lineMaterial = new THREE.MeshBasicMaterial({ color: EnvironmentColors.laneMarking })
     this.dashGeometry = new THREE.BoxGeometry(
@@ -198,15 +201,16 @@ export class Ground {
 
   update(delta: number): void {
     const containerZ = (this.worldContainer as THREE.Group).position.z
+    const intervalMultiplier = this.scrollManager.getSpawnIntervalMultiplier()
 
     this.dashSpawnTimer += delta
-    if (this.dashSpawnTimer >= SpawnConfig.LANE_DASH_SPAWN_INTERVAL) {
+    if (this.dashSpawnTimer >= SpawnConfig.LANE_DASH_SPAWN_INTERVAL * intervalMultiplier) {
       this.spawnDashAt(SpawnConfig.FAR_BOUND_Z - containerZ)
       this.dashSpawnTimer = 0
     }
 
     this.edgeSpawnTimer += delta
-    if (this.edgeSpawnTimer >= SpawnConfig.EDGE_LINE_SPAWN_INTERVAL) {
+    if (this.edgeSpawnTimer >= SpawnConfig.EDGE_LINE_SPAWN_INTERVAL * intervalMultiplier) {
       this.spawnEdgeLinesAt(SpawnConfig.FAR_BOUND_Z - containerZ)
       this.edgeSpawnTimer = 0
     }

@@ -22,10 +22,24 @@ scene
 ```
 
 **Key behaviors:**
-- World container scrolls at `SCROLL_SPEED` when playing
+- World container scrolls at dynamic speed (base speed × multiplier) when playing
 - Obstacles/powerups have their own velocity relative to the container
-- On game over: container stops, but obstacles continue moving (driving off into distance)
+- On game over: container stops, progression resets, obstacles continue at base speed
 - Fixed elements (sky, road plane) stay in scene directly
+
+### Speed Progression
+
+ScrollManager owns speed progression state. Speed increases over time using a quadratic ease-out curve:
+
+- `BASE_SCROLL_SPEED`: 20 units/sec (starting speed)
+- `MAX_SPEED_MULTIPLIER`: 2.5 (caps at 50 units/sec)
+- `SPEED_RAMP_DURATION`: 120 seconds to reach ~100% of max
+
+**Key behaviors:**
+- Progression only advances during PLAYING state (not DROPPING)
+- Spawn intervals decrease proportionally (`1 / multiplier`) to maintain visual density
+- On death: progression resets so game over items move at base speed
+- On restart: full reset via `scrollManager.reset()`
 
 ### Object Pooling
 

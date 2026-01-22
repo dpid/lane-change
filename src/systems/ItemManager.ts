@@ -3,6 +3,7 @@ import { AnimationConfig, PhysicsConfig, SpawnConfig } from '../config'
 import { GeometryType, EffectType, ItemDefinitions } from '../config/items.config'
 import { ItemFactory, type GeometryParts } from '../factories'
 import { ObjectPool, type PooledEntity } from '../pooling'
+import type { ScrollManager } from './ScrollManager'
 
 class Item implements PooledEntity {
   geometryType: GeometryType
@@ -123,6 +124,7 @@ export interface CollisionResult {
 
 export class ItemManager {
   private container: THREE.Object3D
+  private scrollManager: ScrollManager
   private factory: ItemFactory
   private pools: Map<GeometryType, ObjectPool<Item>> = new Map()
   private activeItems: Item[] = []
@@ -130,8 +132,9 @@ export class ItemManager {
   private spawnDeck: SpawnDeck
   private spawnDirection: 'toward_camera' | 'toward_horizon' = 'toward_camera'
 
-  constructor(container: THREE.Object3D) {
+  constructor(container: THREE.Object3D, scrollManager: ScrollManager) {
     this.container = container
+    this.scrollManager = scrollManager
     this.factory = new ItemFactory()
     this.spawnDeck = new SpawnDeck()
     this.initializePools()
@@ -160,7 +163,8 @@ export class ItemManager {
   update(delta: number): void {
     this.spawnTimer += delta
 
-    if (this.spawnTimer >= SpawnConfig.ITEM_SPAWN_INTERVAL) {
+    const spawnInterval = SpawnConfig.ITEM_SPAWN_INTERVAL * this.scrollManager.getSpawnIntervalMultiplier()
+    if (this.spawnTimer >= spawnInterval) {
       this.spawnItem()
       this.spawnTimer = 0
     }
@@ -198,7 +202,7 @@ export class ItemManager {
     item.group.position.x = item.lane === 'left' ? PhysicsConfig.LANE_LEFT_X : PhysicsConfig.LANE_RIGHT_X
     item.group.position.y = definition.yOffset
 
-    const baseVelocity = PhysicsConfig.SCROLL_SPEED * (PhysicsConfig.OBSTACLE_SCROLL_FACTOR - 1)
+    const baseVelocity = this.scrollManager.getScrollSpeed() * (PhysicsConfig.OBSTACLE_SCROLL_FACTOR - 1)
     if (this.spawnDirection === 'toward_camera') {
       item.group.position.z = SpawnConfig.FAR_SPAWN_Z - containerZ
     } else {

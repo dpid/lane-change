@@ -88,10 +88,10 @@ export class Game {
     this.scrollManager = new ScrollManager()
     this.scene.add(this.scrollManager.worldContainer)
 
-    this.background = new Background(this.scene, this.scrollManager.worldContainer)
-    this.ground = new Ground(this.scene, this.scrollManager.worldContainer)
+    this.background = new Background(this.scene, this.scrollManager)
+    this.ground = new Ground(this.scene, this.scrollManager)
     this.motorcycle = new MotorcycleController(this.scene)
-    this.itemManager = new ItemManager(this.scrollManager.worldContainer)
+    this.itemManager = new ItemManager(this.scrollManager.worldContainer, this.scrollManager)
     this.ui = new UI()
     this.inputManager = new InputManager()
 
@@ -162,6 +162,8 @@ export class Game {
     }
 
     if (this.state === GameState.PLAYING) {
+      this.scrollManager.updateProgression(delta)
+
       const motorcycleBox = this.motorcycle.getBoundingBox()
       const currentLane = this.motorcycle.getCurrentLane()
       const motorcycleZ = this.motorcycle.getPosition().z
@@ -181,6 +183,7 @@ export class Game {
       if (result.killed && !this.motorcycle.isDead()) {
         this.motorcycle.loseHitpoint(this.scrollManager.getScrollSpeed())
         this.scrollManager.stopScrolling()
+        this.scrollManager.resetProgression()
         this.itemManager.setSpawnDirection('toward_horizon')
         this.state = GameState.DYING
       }

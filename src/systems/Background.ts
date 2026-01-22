@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { EnvironmentColors, SpawnConfig } from '../config'
 import { SceneryFactory, SceneryType } from '../factories/SceneryFactory'
 import { ObjectPool, type PooledEntity } from '../pooling'
+import type { ScrollManager } from './ScrollManager'
 
 class RoadsideSign implements PooledEntity {
   private group: THREE.Group
@@ -40,14 +41,16 @@ const SIGN_POOL_SIZE = 5
 export class Background {
   private scene: THREE.Scene
   private worldContainer: THREE.Object3D
+  private scrollManager: ScrollManager
   private sky!: THREE.Mesh
   private signPool: ObjectPool<RoadsideSign>
   private signSpawnTimer: number = 0
   private sceneryFactory: SceneryFactory
 
-  constructor(scene: THREE.Scene, worldContainer: THREE.Object3D) {
+  constructor(scene: THREE.Scene, scrollManager: ScrollManager) {
     this.scene = scene
-    this.worldContainer = worldContainer
+    this.scrollManager = scrollManager
+    this.worldContainer = scrollManager.worldContainer
     this.sceneryFactory = new SceneryFactory()
 
     this.signPool = this.createSignPool()
@@ -115,7 +118,8 @@ export class Background {
     const containerZ = (this.worldContainer as THREE.Group).position.z
 
     this.signSpawnTimer += delta
-    if (this.signSpawnTimer >= SpawnConfig.SIGN_SPAWN_INTERVAL) {
+    const signInterval = SpawnConfig.SIGN_SPAWN_INTERVAL * this.scrollManager.getSpawnIntervalMultiplier()
+    if (this.signSpawnTimer >= signInterval) {
       this.spawnSignAt(SpawnConfig.FAR_BOUND_Z - containerZ)
       this.signSpawnTimer = 0
     }

@@ -3,11 +3,17 @@ import { PhysicsConfig } from '../config'
 
 export class ScrollManager {
   readonly worldContainer: THREE.Group
-  private scrollSpeed: number = PhysicsConfig.SCROLL_SPEED
   private scrolling: boolean = false
+  private elapsedTime: number = 0
 
   constructor() {
     this.worldContainer = new THREE.Group()
+  }
+
+  private calculateSpeedMultiplier(): number {
+    const t = this.elapsedTime / PhysicsConfig.SPEED_RAMP_DURATION
+    const curve = 1 - Math.pow(Math.max(0, 1 - t), 2)
+    return 1 + curve * (PhysicsConfig.MAX_SPEED_MULTIPLIER - 1)
   }
 
   addToWorld(object: THREE.Object3D): void {
@@ -27,17 +33,30 @@ export class ScrollManager {
   }
 
   getScrollSpeed(): number {
-    return this.scrollSpeed
+    return PhysicsConfig.BASE_SCROLL_SPEED * this.calculateSpeedMultiplier()
+  }
+
+  getSpawnIntervalMultiplier(): number {
+    return 1 / this.calculateSpeedMultiplier()
+  }
+
+  updateProgression(delta: number): void {
+    this.elapsedTime += delta
+  }
+
+  resetProgression(): void {
+    this.elapsedTime = 0
   }
 
   update(delta: number): void {
     if (this.scrolling) {
-      this.worldContainer.position.z += this.scrollSpeed * delta
+      this.worldContainer.position.z += this.getScrollSpeed() * delta
     }
   }
 
   reset(): void {
     this.worldContainer.position.set(0, 0, 0)
     this.scrolling = false
+    this.elapsedTime = 0
   }
 }
