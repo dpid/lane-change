@@ -1,6 +1,9 @@
+type SDKConstructor = new (config: PlayFunConfig) => PlayFunSDKInstance
+
 declare global {
   interface Window {
-    PlayFunSDK: new (config: PlayFunConfig) => PlayFunSDKInstance
+    PlayFunSDK?: SDKConstructor
+    OpenGameSDK?: SDKConstructor
   }
 }
 
@@ -24,12 +27,13 @@ export class PlayFunManager {
   private pendingPoints: number = 0
 
   async init(gameId: string): Promise<void> {
-    if (!window.PlayFunSDK) {
-      console.warn('PlayFunSDK not loaded - Play.fun integration disabled')
+    const SDK = window.PlayFunSDK || window.OpenGameSDK
+    if (!SDK) {
+      console.warn('Play.fun SDK not loaded - integration disabled')
       return
     }
 
-    this.sdk = new window.PlayFunSDK({
+    this.sdk = new SDK({
       gameId,
       ui: { usePointsWidget: true }
     })
