@@ -7,6 +7,16 @@ export type ModelType =
   | 'truck'
   | 'semi-truck'
 
+export interface VoxelData {
+  position: THREE.Vector3
+  color: THREE.Color
+}
+
+interface CachedModel {
+  group: THREE.Group
+  voxels: VoxelData[]
+}
+
 const MODEL_PATHS: Record<ModelType, string> = {
   'motorcycle': '/models/motorcycle.vox',
   'car': '/models/car-grey.vox',
@@ -17,7 +27,7 @@ const MODEL_PATHS: Record<ModelType, string> = {
 export class AssetLoader {
   private static instance: AssetLoader | null = null
   private loader: VOXLoader
-  private cache: Map<ModelType, THREE.Group> = new Map()
+  private cache: Map<ModelType, CachedModel> = new Map()
   private loaded = false
 
   private constructor() {
@@ -49,15 +59,18 @@ export class AssetLoader {
         path,
         (result) => {
           const group = new THREE.Group()
+          const voxels: VoxelData[] = []
 
           for (const chunk of result.chunks) {
             const mesh = buildMesh(chunk)
             mesh.castShadow = true
             mesh.receiveShadow = true
             group.add(mesh)
+
+            this.extractVoxelData(chunk, voxels)
           }
 
-          this.cache.set(type, group)
+          this.cache.set(type, { group, voxels })
           resolve()
         },
         undefined,
@@ -68,12 +81,44 @@ export class AssetLoader {
     })
   }
 
+  private extractVoxelData(chunk: { size: { x: number, y: number, z: number }, data: Uint8Array, palette: number[] }, voxels: VoxelData[]): void {
+    const { size, data, palette } = chunk
+    const hw = size.x / 2
+    const hh = size.y / 2
+    const hd = size.z / 2
+
+    for (let i = 0; i < data.length; i += 4) {
+      const x = data[i] - hw
+      const y = data[i + 1] - hh
+      const z = data[i + 2] - hd
+      const colorIndex = data[i + 3]
+
+      const colorValue = palette[colorIndex]
+      const r = (colorValue & 0xff) / 255
+      const g = ((colorValue >> 8) & 0xff) / 255
+      const b = ((colorValue >> 16) & 0xff) / 255
+
+      voxels.push({
+        position: new THREE.Vector3(x, z, -y),
+        color: new THREE.Color(r, g, b)
+      })
+    }
+  }
+
   getModel(type: ModelType): THREE.Group {
     const cached = this.cache.get(type)
     if (!cached) {
       throw new Error(`Model ${type} not loaded. Call loadAll() first.`)
     }
-    return cached.clone()
+    return cached.group.clone()
+  }
+
+  getVoxelData(type: ModelType): VoxelData[] {
+    const cached = this.cache.get(type)
+    if (!cached) {
+      throw new Error(`Model ${type} not loaded. Call loadAll() first.`)
+    }
+    return cached.voxels
   }
 
   isLoaded(): boolean {

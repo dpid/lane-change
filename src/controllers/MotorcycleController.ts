@@ -113,28 +113,16 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this._state = CharacterState.DYING
     this.animator.setState(AnimationState.DYING)
     this.dyingTime = 0
-    this.jumpVelocity = PhysicsConfig.CRASH_POP_VELOCITY
     this.exitDirection = this.currentLane === 'left' ? -1 : 1
-    this.tintRed()
-    this.renderOnTop()
   }
 
-  private renderOnTop(): void {
-    this._group.renderOrder = 999
-    this._group.traverse((child) => {
-      if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshLambertMaterial) {
-        child.material.depthTest = false
-      }
-    })
-  }
-
-  private tintRed(): void {
-    this._group.traverse((child) => {
-      if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshLambertMaterial) {
-        child.material = child.material.clone()
-        child.material.color.lerp(new THREE.Color(0xff0000), 0.5)
-      }
-    })
+  triggerVoxelBurst(): THREE.Matrix4 {
+    this._group.updateMatrixWorld()
+    const bodyPivot = this.geometryParts.parts.get('bodyPivot') as THREE.Group
+    bodyPivot.children[0].updateMatrixWorld()
+    const worldMatrix = bodyPivot.children[0].matrixWorld.clone()
+    this._group.visible = false
+    return worldMatrix
   }
 
   update(delta: number, speedMultiplier: number = 1): void {
@@ -224,24 +212,7 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     }
   }
 
-  private updateDying(delta: number): void {
-    this.dyingTime += delta
-    this.jumpVelocity -= PhysicsConfig.GRAVITY * delta
-    this._group.position.y += this.jumpVelocity * delta
-    this._group.position.x += this.exitDirection * PhysicsConfig.CRASH_EXIT_VELOCITY_X * delta
-
-    const context: MotorcycleAnimationContext = {
-      targetLane: null,
-      laneProgress: 0,
-      groupY: this._group.position.y,
-      dyingTime: this.dyingTime
-    }
-    this.animator.update(delta, context)
-
-    if (Math.abs(this._group.position.x) > PhysicsConfig.CRASH_EXIT_X) {
-      this._state = CharacterState.IDLE
-      this.emit('dieComplete')
-    }
+  private updateDying(_delta: number): void {
   }
 
   getPosition(): THREE.Vector3 {

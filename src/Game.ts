@@ -9,7 +9,7 @@ import { InputManager } from './input/InputManager'
 import { PlayerInputProvider } from './input/PlayerInputProvider'
 import { InputActionType } from './input/InputAction'
 import { AssetLoader } from './loaders'
-import { SmokeSystem } from './effects'
+import { SmokeSystem, VoxelBurstSystem } from './effects'
 import { EnvironmentColors, FogConfig } from './config'
 
 export enum GameState {
@@ -38,6 +38,7 @@ export class Game {
   private ui!: UI
   private inputManager!: InputManager
   private smokeSystem!: SmokeSystem
+  private voxelBurstSystem!: VoxelBurstSystem
 
   private state: GameState = GameState.MENU
   private score: number = 0
@@ -100,6 +101,7 @@ export class Game {
     this.motorcycle = new MotorcycleController(this.scene)
     this.smokeSystem = new SmokeSystem(this.scene)
     this.smokeSystem.setMotorcycle(this.motorcycle.group)
+    this.voxelBurstSystem = new VoxelBurstSystem(this.scene)
     this.itemManager = new ItemManager(this.scrollManager.worldContainer, this.scrollManager)
     this.ui = new UI()
     this.inputManager = new InputManager()
@@ -107,13 +109,6 @@ export class Game {
     this.motorcycle.on('dropComplete', () => {
       if (this.state === GameState.DROPPING) {
         this.state = GameState.PLAYING
-      }
-    })
-
-    this.motorcycle.on('dieComplete', () => {
-      if (this.state !== GameState.GAME_OVER) {
-        this.state = GameState.GAME_OVER
-        this.ui.showGameOver(this.score)
       }
     })
 
@@ -151,6 +146,7 @@ export class Game {
     this.itemManager.reset()
     this.motorcycle.reset()
     this.smokeSystem.reset()
+    this.voxelBurstSystem.reset()
     this.startGame()
   }
 
@@ -194,6 +190,16 @@ export class Game {
       if (result.killed && !this.motorcycle.isDead()) {
         this.smokeSystem.emitCrashBurst(this.scrollManager.getScrollSpeed())
         this.motorcycle.loseHitpoint(this.scrollManager.getScrollSpeed())
+
+        const worldMatrix = this.motorcycle.triggerVoxelBurst()
+        const voxelData = AssetLoader.getInstance().getVoxelData('motorcycle')
+        this.voxelBurstSystem.emitBurst(worldMatrix, voxelData, () => {
+          if (this.state !== GameState.GAME_OVER) {
+            this.state = GameState.GAME_OVER
+            this.ui.showGameOver(this.score)
+          }
+        })
+
         this.scrollManager.stopScrolling()
         this.scrollManager.resetProgression()
         this.itemManager.setSpawnDirection('toward_horizon')
@@ -207,6 +213,10 @@ export class Game {
 
     const isEmitting = this.state === GameState.PLAYING
     this.smokeSystem.update(delta, isEmitting, this.scrollManager.getScrollSpeed())
+
+    if (this.state === GameState.DYING || this.state === GameState.GAME_OVER) {
+      this.voxelBurstSystem.update(delta)
+    }
 
     this.renderer.render(this.scene, this.camera)
   }

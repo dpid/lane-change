@@ -1,0 +1,14 @@
+export const VoxelBurstConfig = {
+  POOL_SIZE: 600,
+  VOXEL_SIZE: 0.04,
+
+  BURST_BASE_SPEED: 15,
+  BURST_SPEED_VARIANCE: 8,
+  BURST_UPWARD_BIAS: 6,
+
+  GRAVITY: 20,
+  ANGULAR_VELOCITY_MAX: 15,
+
+  LIFETIME: 2.0,
+  FADE_START: 0.6
+} as const
