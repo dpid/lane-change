@@ -3,6 +3,8 @@ import { AnimationConfig, PhysicsConfig, SpawnConfig } from '../config'
 import { PowerupFactory, PowerupType, type GeometryParts } from '../factories'
 import { ObjectPool, type PooledEntity } from '../pooling'
 
+const POWERUP_OWN_VELOCITY = PhysicsConfig.SCROLL_SPEED * (PhysicsConfig.OBSTACLE_SCROLL_FACTOR - 1)
+
 class Powerup implements PooledEntity {
   type: PowerupType
   lane: 'left' | 'right'
@@ -51,14 +53,14 @@ class Powerup implements PooledEntity {
 }
 
 export class PowerupManager {
-  private scene: THREE.Scene
+  private container: THREE.Object3D
   private factory: PowerupFactory
   private pool!: ObjectPool<Powerup>
   private activePowerups: Powerup[] = []
   private spawnTimer: number = 0
 
-  constructor(scene: THREE.Scene) {
-    this.scene = scene
+  constructor(container: THREE.Object3D) {
+    this.container = container
     this.factory = new PowerupFactory()
     this.initializePool()
   }
@@ -71,7 +73,7 @@ export class PowerupManager {
       () => {
         const powerup = new Powerup(PowerupType.COIN, this.factory)
         powerup.deactivate()
-        this.scene.add(powerup.group)
+        this.container.add(powerup.group)
         return powerup
       },
       INITIAL_POOL_SIZE,
@@ -79,7 +81,7 @@ export class PowerupManager {
     )
   }
 
-  update(delta: number, scrollSpeed: number): void {
+  update(delta: number): void {
     this.spawnTimer += delta
 
     if (this.spawnTimer >= SpawnConfig.POWERUP_SPAWN_INTERVAL) {
@@ -87,14 +89,17 @@ export class PowerupManager {
       this.spawnTimer = 0
     }
 
+    const containerZ = (this.container as THREE.Group).position.z
+
     for (let i = this.activePowerups.length - 1; i >= 0; i--) {
       const powerup = this.activePowerups[i]
-      powerup.group.position.z += scrollSpeed * delta
+      powerup.group.position.z += POWERUP_OWN_VELOCITY * delta
 
       powerup.rotation += AnimationConfig.COIN_ROTATION_SPEED * delta
       powerup.group.rotation.y = powerup.rotation
 
-      if (powerup.group.position.z > SpawnConfig.OBSTACLE_DESPAWN_Z) {
+      const worldZ = powerup.group.position.z + containerZ
+      if (worldZ > SpawnConfig.OBSTACLE_DESPAWN_Z) {
         this.pool.release(powerup)
         this.activePowerups.splice(i, 1)
       }
@@ -105,22 +110,25 @@ export class PowerupManager {
     const powerup = this.pool.acquire()
     if (!powerup) return
 
+    const containerZ = (this.container as THREE.Group).position.z
     powerup.lane = Math.random() < 0.5 ? 'left' : 'right'
     powerup.group.position.x = powerup.lane === 'left' ? PhysicsConfig.LANE_LEFT_X : PhysicsConfig.LANE_RIGHT_X
     const RIDER_HEIGHT = 0.8
     powerup.group.position.y = RIDER_HEIGHT
-    powerup.group.position.z = SpawnConfig.OBSTACLE_SPAWN_Z
+    powerup.group.position.z = SpawnConfig.OBSTACLE_SPAWN_Z - containerZ
     this.activePowerups.push(powerup)
   }
 
-  checkCollection(motorcycleBox: THREE.Box3, currentLane: 'left' | 'right'): number {
+  checkCollection(motorcycleBox: THREE.Box3, currentLane: 'left' | 'right', worldZ: number): number {
     let collectedCount = 0
 
     for (let i = this.activePowerups.length - 1; i >= 0; i--) {
       const powerup = this.activePowerups[i]
 
       if (powerup.lane === currentLane && !powerup.collected) {
-        if (motorcycleBox.intersectsBox(powerup.getBoundingBox())) {
+        const powerupBox = powerup.getBoundingBox()
+        powerupBox.translate(new THREE.Vector3(0, 0, worldZ))
+        if (motorcycleBox.intersectsBox(powerupBox)) {
           powerup.collected = true
           collectedCount++
           this.pool.release(powerup)

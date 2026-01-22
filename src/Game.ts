@@ -4,10 +4,10 @@ import { ObstacleManager } from './systems/ObstacleManager'
 import { PowerupManager } from './systems/PowerupManager'
 import { Background } from './systems/Background'
 import { Ground } from './systems/Ground'
+import { ScrollManager } from './systems/ScrollManager'
 import { UI } from './ui/UI'
 import { InputManager } from './input/InputManager'
 import { PlayerInputProvider } from './input/PlayerInputProvider'
-import { PhysicsConfig } from './config'
 import { InputActionType } from './input/InputAction'
 
 export enum GameState {
@@ -33,12 +33,12 @@ export class Game {
   private powerupManager!: PowerupManager
   private background!: Background
   private ground!: Ground
+  private scrollManager!: ScrollManager
   private ui!: UI
   private inputManager!: InputManager
 
   private state: GameState = GameState.MENU
   private score: number = 0
-  private scrollSpeed: number = PhysicsConfig.SCROLL_SPEED
 
   constructor() {
     const canvas = document.getElementById('game') as HTMLCanvasElement
@@ -87,11 +87,14 @@ export class Game {
   }
 
   init(): void {
-    this.background = new Background(this.scene)
-    this.ground = new Ground(this.scene)
+    this.scrollManager = new ScrollManager()
+    this.scene.add(this.scrollManager.worldContainer)
+
+    this.background = new Background(this.scene, this.scrollManager.worldContainer)
+    this.ground = new Ground(this.scene, this.scrollManager.worldContainer)
     this.motorcycle = new MotorcycleController(this.scene)
-    this.obstacleManager = new ObstacleManager(this.scene)
-    this.powerupManager = new PowerupManager(this.scene)
+    this.obstacleManager = new ObstacleManager(this.scrollManager.worldContainer)
+    this.powerupManager = new PowerupManager(this.scrollManager.worldContainer)
     this.ui = new UI()
     this.inputManager = new InputManager()
 
@@ -132,10 +135,12 @@ export class Game {
     this.ui.updateScore(0)
     this.ui.showGame()
     this.state = GameState.DROPPING
+    this.scrollManager.startScrolling()
     this.motorcycle.dropIn()
   }
 
   private restartGame(): void {
+    this.scrollManager.reset()
     this.obstacleManager.reset()
     this.powerupManager.reset()
     this.motorcycle.reset()
@@ -150,37 +155,38 @@ export class Game {
       delta = MAX_DELTA
     }
 
-    if (this.state === GameState.PLAYING) {
-      this.background.update(delta, this.scrollSpeed)
-      this.ground.update(delta, this.scrollSpeed)
+    if (this.state === GameState.DROPPING || this.state === GameState.PLAYING) {
+      this.scrollManager.update(delta)
+      this.background.update(delta)
+      this.ground.update(delta)
     }
 
-    const obstacleScrollSpeed = this.scrollSpeed * PhysicsConfig.OBSTACLE_SCROLL_FACTOR
-
     if (this.state === GameState.PLAYING || this.state === GameState.DYING || this.state === GameState.GAME_OVER) {
-      this.obstacleManager.update(delta, obstacleScrollSpeed)
-      this.powerupManager.update(delta, obstacleScrollSpeed)
+      this.obstacleManager.update(delta)
+      this.powerupManager.update(delta)
     }
 
     if (this.state === GameState.PLAYING) {
       const motorcycleBox = this.motorcycle.getBoundingBox()
       const currentLane = this.motorcycle.getCurrentLane()
 
-      const passedObstacles = this.obstacleManager.getPassedObstacles(this.motorcycle.getPosition().z)
+      const worldZ = this.scrollManager.worldContainer.position.z
+      const passedObstacles = this.obstacleManager.getPassedObstacles(this.motorcycle.getPosition().z, worldZ)
       if (passedObstacles > 0) {
         this.score += passedObstacles * POINTS_PER_OBSTACLE
         this.ui.updateScore(this.score)
       }
 
-      const collectedCoins = this.powerupManager.checkCollection(motorcycleBox, currentLane)
+      const collectedCoins = this.powerupManager.checkCollection(motorcycleBox, currentLane, worldZ)
       if (collectedCoins > 0) {
         this.score += collectedCoins * POINTS_PER_COIN
         this.ui.updateScore(this.score)
       }
 
-      const hasCollision = this.obstacleManager.checkCollision(motorcycleBox, currentLane)
+      const hasCollision = this.obstacleManager.checkCollision(motorcycleBox, currentLane, worldZ)
       if (hasCollision && !this.motorcycle.isDead()) {
-        this.motorcycle.loseHitpoint(this.scrollSpeed)
+        this.motorcycle.loseHitpoint(this.scrollManager.getScrollSpeed())
+        this.scrollManager.stopScrolling()
         this.state = GameState.DYING
       }
     }

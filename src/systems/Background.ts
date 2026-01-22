@@ -4,19 +4,20 @@ import { SceneryFactory, SceneryType } from '../factories/SceneryFactory'
 
 interface BackgroundLayer {
   groups: THREE.Group[]
-  speed: number
   initialZ: number
 }
 
 export class Background {
   private scene: THREE.Scene
+  private worldContainer: THREE.Object3D
   private distantLayer!: BackgroundLayer
   private midLayer!: BackgroundLayer
   private nearLayer!: BackgroundLayer
   private sky!: THREE.Mesh
 
-  constructor(scene: THREE.Scene) {
+  constructor(scene: THREE.Scene, worldContainer: THREE.Object3D) {
     this.scene = scene
+    this.worldContainer = worldContainer
     this.createSky()
     this.createDistantLayer()
     this.createMidLayer()
@@ -60,18 +61,17 @@ export class Background {
     for (let i = 0; i < buildingCount; i++) {
       const leftBuilding = this.createBuilding(15, 30)
       leftBuilding.position.set(-SpawnConfig.DISTANT_BUILDINGS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / buildingCount))
-      this.scene.add(leftBuilding)
+      this.worldContainer.add(leftBuilding)
       groups.push(leftBuilding)
 
       const rightBuilding = this.createBuilding(15, 30)
       rightBuilding.position.set(SpawnConfig.DISTANT_BUILDINGS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / buildingCount))
-      this.scene.add(rightBuilding)
+      this.worldContainer.add(rightBuilding)
       groups.push(rightBuilding)
     }
 
     this.distantLayer = {
       groups,
-      speed: SpawnConfig.DISTANT_PARALLAX_SPEED,
       initialZ: zStart
     }
   }
@@ -84,18 +84,17 @@ export class Background {
     for (let i = 0; i < buildingCount; i++) {
       const leftBuilding = this.createBuilding(8, 20)
       leftBuilding.position.set(-SpawnConfig.MID_BUILDINGS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / buildingCount))
-      this.scene.add(leftBuilding)
+      this.worldContainer.add(leftBuilding)
       groups.push(leftBuilding)
 
       const rightBuilding = this.createBuilding(8, 20)
       rightBuilding.position.set(SpawnConfig.MID_BUILDINGS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / buildingCount))
-      this.scene.add(rightBuilding)
+      this.worldContainer.add(rightBuilding)
       groups.push(rightBuilding)
     }
 
     this.midLayer = {
       groups,
-      speed: SpawnConfig.MID_PARALLAX_SPEED,
       initialZ: zStart
     }
   }
@@ -109,18 +108,17 @@ export class Background {
     for (let i = 0; i < objectCount; i++) {
       const leftObject = this.createNearObject(sceneryFactory)
       leftObject.position.set(-SpawnConfig.NEAR_OBJECTS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / objectCount))
-      this.scene.add(leftObject)
+      this.worldContainer.add(leftObject)
       groups.push(leftObject)
 
       const rightObject = this.createNearObject(sceneryFactory)
       rightObject.position.set(SpawnConfig.NEAR_OBJECTS_X, 0, zStart + i * (SpawnConfig.BACKGROUND_SPAWN_RANGE / objectCount))
-      this.scene.add(rightObject)
+      this.worldContainer.add(rightObject)
       groups.push(rightObject)
     }
 
     this.nearLayer = {
       groups,
-      speed: SpawnConfig.NEAR_PARALLAX_SPEED,
       initialZ: zStart
     }
   }
@@ -186,19 +184,18 @@ export class Background {
     return geometryParts.root
   }
 
-  update(delta: number, scrollSpeed: number): void {
-    this.updateLayer(this.distantLayer, delta, scrollSpeed)
-    this.updateLayer(this.midLayer, delta, scrollSpeed)
-    this.updateLayer(this.nearLayer, delta, scrollSpeed)
+  update(_delta: number): void {
+    const containerZ = (this.worldContainer as THREE.Group).position.z
+    this.wrapLayer(this.distantLayer, containerZ)
+    this.wrapLayer(this.midLayer, containerZ)
+    this.wrapLayer(this.nearLayer, containerZ)
   }
 
-  private updateLayer(layer: BackgroundLayer, delta: number, scrollSpeed: number): void {
-    const moveDistance = scrollSpeed * layer.speed * delta
+  private wrapLayer(layer: BackgroundLayer, containerZ: number): void {
+    const threshold = SpawnConfig.BACKGROUND_WRAP_DISTANCE / 2
 
     for (const group of layer.groups) {
-      group.position.z += moveDistance
-
-      if (group.position.z > SpawnConfig.BACKGROUND_WRAP_DISTANCE / 2) {
+      while (group.position.z + containerZ > threshold) {
         group.position.z -= SpawnConfig.BACKGROUND_WRAP_DISTANCE
       }
     }

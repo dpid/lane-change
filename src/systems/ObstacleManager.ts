@@ -3,6 +3,8 @@ import { PhysicsConfig, SpawnConfig } from '../config'
 import { ObstacleFactory, ObstacleType, type GeometryParts } from '../factories'
 import { ObjectPool, type PooledEntity } from '../pooling'
 
+const OBSTACLE_OWN_VELOCITY = PhysicsConfig.SCROLL_SPEED * (PhysicsConfig.OBSTACLE_SCROLL_FACTOR - 1)
+
 class Obstacle implements PooledEntity {
   type: ObstacleType
   lane: 'left' | 'right'
@@ -49,15 +51,15 @@ class Obstacle implements PooledEntity {
 }
 
 export class ObstacleManager {
-  private scene: THREE.Scene
+  private container: THREE.Object3D
   private factory: ObstacleFactory
   private pools: Map<ObstacleType, ObjectPool<Obstacle>> = new Map()
   private activeObstacles: Obstacle[] = []
   private spawnTimer: number = 0
   private spawnInterval: number = SpawnConfig.OBSTACLE_MIN_SPAWN_INTERVAL
 
-  constructor(scene: THREE.Scene) {
-    this.scene = scene
+  constructor(container: THREE.Object3D) {
+    this.container = container
     this.factory = new ObstacleFactory()
     this.initializePools()
   }
@@ -72,7 +74,7 @@ export class ObstacleManager {
         () => {
           const obstacle = new Obstacle(type, this.factory)
           obstacle.deactivate()
-          this.scene.add(obstacle.group)
+          this.container.add(obstacle.group)
           return obstacle
         },
         INITIAL_POOL_SIZE,
@@ -82,7 +84,7 @@ export class ObstacleManager {
     }
   }
 
-  update(delta: number, scrollSpeed: number): void {
+  update(delta: number): void {
     this.spawnTimer += delta
 
     if (this.spawnTimer >= this.spawnInterval) {
@@ -92,11 +94,14 @@ export class ObstacleManager {
       this.spawnInterval = SpawnConfig.OBSTACLE_MIN_SPAWN_INTERVAL + Math.random() * range
     }
 
+    const containerZ = (this.container as THREE.Group).position.z
+
     for (let i = this.activeObstacles.length - 1; i >= 0; i--) {
       const obstacle = this.activeObstacles[i]
-      obstacle.group.position.z += scrollSpeed * delta
+      obstacle.group.position.z += OBSTACLE_OWN_VELOCITY * delta
 
-      if (obstacle.group.position.z > SpawnConfig.OBSTACLE_DESPAWN_Z) {
+      const worldZ = obstacle.group.position.z + containerZ
+      if (worldZ > SpawnConfig.OBSTACLE_DESPAWN_Z) {
         const pool = this.pools.get(obstacle.type)
         if (pool) {
           pool.release(obstacle)
@@ -116,16 +121,19 @@ export class ObstacleManager {
     const obstacle = pool.acquire()
     if (!obstacle) return
 
+    const containerZ = (this.container as THREE.Group).position.z
     obstacle.lane = Math.random() < 0.5 ? 'left' : 'right'
     obstacle.group.position.x = obstacle.lane === 'left' ? PhysicsConfig.LANE_LEFT_X : PhysicsConfig.LANE_RIGHT_X
-    obstacle.group.position.z = SpawnConfig.OBSTACLE_SPAWN_Z
+    obstacle.group.position.z = SpawnConfig.OBSTACLE_SPAWN_Z - containerZ
     this.activeObstacles.push(obstacle)
   }
 
-  checkCollision(motorcycleBox: THREE.Box3, currentLane: 'left' | 'right'): boolean {
+  checkCollision(motorcycleBox: THREE.Box3, currentLane: 'left' | 'right', worldZ: number): boolean {
     for (const obstacle of this.activeObstacles) {
       if (obstacle.lane === currentLane) {
-        if (motorcycleBox.intersectsBox(obstacle.getBoundingBox())) {
+        const obstacleBox = obstacle.getBoundingBox()
+        obstacleBox.translate(new THREE.Vector3(0, 0, worldZ))
+        if (motorcycleBox.intersectsBox(obstacleBox)) {
           return true
         }
       }
@@ -133,11 +141,12 @@ export class ObstacleManager {
     return false
   }
 
-  getPassedObstacles(motorcycleZ: number): number {
+  getPassedObstacles(motorcycleZ: number, worldZ: number): number {
     let count = 0
     const PASSED_THRESHOLD = 0.5
     for (const obstacle of this.activeObstacles) {
-      if (!obstacle.passed && obstacle.group.position.z > motorcycleZ + PASSED_THRESHOLD) {
+      const obstacleWorldZ = obstacle.group.position.z + worldZ
+      if (!obstacle.passed && obstacleWorldZ > motorcycleZ + PASSED_THRESHOLD) {
         obstacle.passed = true
         count++
       }

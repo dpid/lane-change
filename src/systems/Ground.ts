@@ -3,11 +3,13 @@ import { EnvironmentColors, SpawnConfig } from '../config'
 
 export class Ground {
   private scene: THREE.Scene
+  private worldContainer: THREE.Object3D
   private laneMarkings: THREE.Group
   private edgeLines: THREE.Group
 
-  constructor(scene: THREE.Scene) {
+  constructor(scene: THREE.Scene, worldContainer: THREE.Object3D) {
     this.scene = scene
+    this.worldContainer = worldContainer
     this.laneMarkings = new THREE.Group()
     this.edgeLines = new THREE.Group()
     this.createGround()
@@ -23,8 +25,8 @@ export class Ground {
 
     this.createLaneMarkings()
     this.createEdgeLines()
-    this.scene.add(this.laneMarkings)
-    this.scene.add(this.edgeLines)
+    this.worldContainer.add(this.laneMarkings)
+    this.worldContainer.add(this.edgeLines)
   }
 
   private createLaneMarkings(): void {
@@ -63,22 +65,19 @@ export class Ground {
     }
   }
 
-  update(delta: number, scrollSpeed: number): void {
-    const moveAmount = scrollSpeed * delta
+  update(_delta: number): void {
+    const containerZ = (this.worldContainer as THREE.Group).position.z
+    const wrapDistance = SpawnConfig.LANE_MARKING_WRAP_THRESHOLD - SpawnConfig.LANE_MARKING_RESET_Z
 
     this.laneMarkings.children.forEach((dash) => {
-      dash.position.z += moveAmount
-
-      if (dash.position.z > SpawnConfig.LANE_MARKING_WRAP_THRESHOLD) {
-        dash.position.z = SpawnConfig.LANE_MARKING_RESET_Z
+      while (dash.position.z + containerZ > SpawnConfig.LANE_MARKING_WRAP_THRESHOLD) {
+        dash.position.z -= wrapDistance
       }
     })
 
     this.edgeLines.children.forEach((line) => {
-      line.position.z += moveAmount
-
-      if (line.position.z > SpawnConfig.LANE_MARKING_WRAP_THRESHOLD) {
-        line.position.z = SpawnConfig.LANE_MARKING_RESET_Z
+      while (line.position.z + containerZ > SpawnConfig.LANE_MARKING_WRAP_THRESHOLD) {
+        line.position.z -= wrapDistance
       }
     })
   }
