@@ -6,6 +6,7 @@ export const PhysicsConfig = {
   LANE_SWITCH_SPEED: 8,
   LANE_LEFT_X: -1.5,
   LANE_RIGHT_X: 1.5,
+  LANE_LEAN_ANGLE: 0.873,
   DROP_START_Y: 5,
   GRAVITY: 20,
 
