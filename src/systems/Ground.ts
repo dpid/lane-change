@@ -101,7 +101,7 @@ export class Ground {
       SpawnConfig.LANE_DASH_LENGTH
     )
 
-    const lineWidth = 0.15
+    const lineWidth = 0.3
     this.edgeGeometry = new THREE.BoxGeometry(lineWidth, 0.01, SpawnConfig.EDGE_LINE_SEGMENT_LENGTH)
     this.leftEdgeX = -(SpawnConfig.ROAD_WIDTH / 2 - lineWidth / 2)
     this.rightEdgeX = SpawnConfig.ROAD_WIDTH / 2 - lineWidth / 2

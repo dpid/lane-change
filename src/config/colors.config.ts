@@ -20,7 +20,7 @@ export const EnvironmentColors = {
   skyTop: 0x4a90e2,
   skyBottom: 0xb8d4f0,
   road: 0x3a3a3a,
-  laneMarking: 0xffffff,
+  laneMarking: 0xcccccc,
   grass: 0x4a7c23,
   fog: 0xb8d4f0
 } as const
