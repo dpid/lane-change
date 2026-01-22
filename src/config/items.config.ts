@@ -1,6 +1,7 @@
 export enum GeometryType {
   CAR = 'CAR',
   TRUCK = 'TRUCK',
+  SEMI_TRUCK = 'SEMI_TRUCK',
   COIN = 'COIN',
   NONE = 'NONE'
 }
@@ -34,7 +35,15 @@ export const ItemDefinitions: Record<GeometryType, ItemDefinition> = {
   [GeometryType.TRUCK]: {
     geometryType: GeometryType.TRUCK,
     effectType: EffectType.KILL,
-    cardCount: 20,
+    cardCount: 15,
+    yOffset: 0,
+    collisionModifier: -0.1,
+    rotates: false
+  },
+  [GeometryType.SEMI_TRUCK]: {
+    geometryType: GeometryType.SEMI_TRUCK,
+    effectType: EffectType.KILL,
+    cardCount: 10,
     yOffset: 0,
     collisionModifier: -0.1,
     rotates: false

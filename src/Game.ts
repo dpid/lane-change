@@ -8,6 +8,7 @@ import { UI } from './ui/UI'
 import { InputManager } from './input/InputManager'
 import { PlayerInputProvider } from './input/PlayerInputProvider'
 import { InputActionType } from './input/InputAction'
+import { AssetLoader } from './loaders'
 
 export enum GameState {
   MENU,
@@ -84,7 +85,9 @@ export class Game {
     })
   }
 
-  init(): void {
+  async init(): Promise<void> {
+    await AssetLoader.getInstance().loadAll()
+
     this.scrollManager = new ScrollManager()
     this.scene.add(this.scrollManager.worldContainer)
 
