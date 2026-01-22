@@ -1,23 +1,71 @@
 import * as THREE from 'three'
 import { EnvironmentColors, SpawnConfig } from '../config'
 import { SceneryFactory, SceneryType } from '../factories/SceneryFactory'
+import { ObjectPool, type PooledEntity } from '../pooling'
 
-interface BackgroundLayer {
-  groups: THREE.Group[]
-  initialZ: number
+class RoadsideSign implements PooledEntity {
+  private group: THREE.Group
+  private _active: boolean = false
+
+  get active(): boolean {
+    return this._active
+  }
+
+  get object(): THREE.Group {
+    return this.group
+  }
+
+  constructor(factory: SceneryFactory) {
+    const parts = factory.create({ type: SceneryType.SIGN })
+    this.group = parts.root
+  }
+
+  activate(): void {
+    this._active = true
+    this.group.visible = true
+  }
+
+  deactivate(): void {
+    this._active = false
+    this.group.visible = false
+  }
+
+  reset(): void {
+    this.group.position.set(0, 0, 0)
+  }
 }
+
+const SIGN_POOL_SIZE = 5
 
 export class Background {
   private scene: THREE.Scene
   private worldContainer: THREE.Object3D
-  private nearLayer!: BackgroundLayer
   private sky!: THREE.Mesh
+  private signPool: ObjectPool<RoadsideSign>
+  private signSpawnTimer: number = 0
+  private sceneryFactory: SceneryFactory
 
   constructor(scene: THREE.Scene, worldContainer: THREE.Object3D) {
     this.scene = scene
     this.worldContainer = worldContainer
+    this.sceneryFactory = new SceneryFactory()
+
+    this.signPool = this.createSignPool()
+
     this.createSky()
-    this.createNearLayer()
+    this.spawnInitialSign()
+  }
+
+  private createSignPool(): ObjectPool<RoadsideSign> {
+    return new ObjectPool<RoadsideSign>(
+      () => {
+        const sign = new RoadsideSign(this.sceneryFactory)
+        sign.deactivate()
+        this.worldContainer.add(sign.object)
+        return sign
+      },
+      SIGN_POOL_SIZE
+    )
   }
 
   private createSky(): void {
@@ -49,45 +97,40 @@ export class Background {
     this.scene.add(this.sky)
   }
 
-  private createNearLayer(): void {
-    const groups: THREE.Group[] = []
-    const sceneryFactory = new SceneryFactory()
-    const signCount = SpawnConfig.SIGN_COUNT
-    const wrapDistance = SpawnConfig.DESPAWN_Z - SpawnConfig.SPAWN_Z
-    const spacing = wrapDistance / signCount
-
-    for (let i = 0; i < signCount; i++) {
-      const sign = this.createNearObject(sceneryFactory)
-      const isLeft = Math.random() < 0.5
-      const xPos = isLeft ? -SpawnConfig.NEAR_OBJECTS_X : SpawnConfig.NEAR_OBJECTS_X
-      sign.position.set(xPos, 0, SpawnConfig.SPAWN_Z + i * spacing)
-      this.worldContainer.add(sign)
-      groups.push(sign)
-    }
-
-    this.nearLayer = {
-      groups,
-      initialZ: SpawnConfig.SPAWN_Z
-    }
-  }
-
-  private createNearObject(sceneryFactory: SceneryFactory): THREE.Group {
-    const geometryParts = sceneryFactory.create({ type: SceneryType.SIGN })
-    return geometryParts.root
-  }
-
-  update(_delta: number): void {
+  private spawnInitialSign(): void {
     const containerZ = (this.worldContainer as THREE.Group).position.z
-    this.wrapLayer(this.nearLayer, containerZ)
+    this.spawnSignAt(SpawnConfig.SPAWN_Z - containerZ)
   }
 
-  private wrapLayer(layer: BackgroundLayer, containerZ: number): void {
-    const wrapDistance = SpawnConfig.DESPAWN_Z - SpawnConfig.SPAWN_Z
+  private spawnSignAt(localZ: number): void {
+    const sign = this.signPool.acquire()
+    if (!sign) return
 
-    for (const group of layer.groups) {
-      while (group.position.z + containerZ > SpawnConfig.DESPAWN_Z) {
-        group.position.z -= wrapDistance
+    const isLeft = Math.random() < 0.5
+    const xPos = isLeft ? -SpawnConfig.NEAR_OBJECTS_X : SpawnConfig.NEAR_OBJECTS_X
+    sign.object.position.set(xPos, 0, localZ)
+  }
+
+  update(delta: number): void {
+    const containerZ = (this.worldContainer as THREE.Group).position.z
+
+    this.signSpawnTimer += delta
+    if (this.signSpawnTimer >= SpawnConfig.SIGN_SPAWN_INTERVAL) {
+      this.spawnSignAt(SpawnConfig.SPAWN_Z - containerZ)
+      this.signSpawnTimer = 0
+    }
+
+    for (const sign of this.signPool.getActive()) {
+      const worldZ = sign.object.position.z + containerZ
+      if (worldZ > SpawnConfig.DESPAWN_Z) {
+        this.signPool.release(sign)
       }
     }
+  }
+
+  reset(): void {
+    this.signPool.releaseAll()
+    this.signSpawnTimer = 0
+    this.spawnInitialSign()
   }
 }

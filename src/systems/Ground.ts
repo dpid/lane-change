@@ -1,18 +1,138 @@
 import * as THREE from 'three'
 import { EnvironmentColors, SpawnConfig } from '../config'
+import { ObjectPool, type PooledEntity } from '../pooling'
+
+class LaneDash implements PooledEntity {
+  private mesh: THREE.Mesh
+  private _active: boolean = false
+
+  get active(): boolean {
+    return this._active
+  }
+
+  get object(): THREE.Mesh {
+    return this.mesh
+  }
+
+  constructor(geometry: THREE.BoxGeometry, material: THREE.Material) {
+    this.mesh = new THREE.Mesh(geometry, material)
+    this.mesh.position.y = 0.01
+  }
+
+  activate(): void {
+    this._active = true
+    this.mesh.visible = true
+  }
+
+  deactivate(): void {
+    this._active = false
+    this.mesh.visible = false
+  }
+
+  reset(): void {
+    this.mesh.position.set(0, 0.01, 0)
+  }
+}
+
+class EdgeLineSegment implements PooledEntity {
+  private mesh: THREE.Mesh
+  private _active: boolean = false
+
+  get active(): boolean {
+    return this._active
+  }
+
+  get object(): THREE.Mesh {
+    return this.mesh
+  }
+
+  constructor(geometry: THREE.BoxGeometry, material: THREE.Material) {
+    this.mesh = new THREE.Mesh(geometry, material)
+    this.mesh.position.y = 0.01
+  }
+
+  activate(): void {
+    this._active = true
+    this.mesh.visible = true
+  }
+
+  deactivate(): void {
+    this._active = false
+    this.mesh.visible = false
+  }
+
+  reset(): void {
+    this.mesh.position.y = 0.01
+  }
+}
+
+const LANE_DASH_POOL_SIZE = 20
+const EDGE_LINE_POOL_SIZE = 15
 
 export class Ground {
   private scene: THREE.Scene
   private worldContainer: THREE.Object3D
-  private laneMarkings: THREE.Group
-  private edgeLines: THREE.Group
+
+  private dashPool: ObjectPool<LaneDash>
+  private leftEdgePool: ObjectPool<EdgeLineSegment>
+  private rightEdgePool: ObjectPool<EdgeLineSegment>
+
+  private dashSpawnTimer: number = 0
+  private edgeSpawnTimer: number = 0
+
+  private dashGeometry: THREE.BoxGeometry
+  private edgeGeometry: THREE.BoxGeometry
+  private lineMaterial: THREE.MeshBasicMaterial
+
+  private leftEdgeX: number
+  private rightEdgeX: number
 
   constructor(scene: THREE.Scene, worldContainer: THREE.Object3D) {
     this.scene = scene
     this.worldContainer = worldContainer
-    this.laneMarkings = new THREE.Group()
-    this.edgeLines = new THREE.Group()
+
+    this.lineMaterial = new THREE.MeshBasicMaterial({ color: EnvironmentColors.laneMarking })
+    this.dashGeometry = new THREE.BoxGeometry(
+      SpawnConfig.LANE_DASH_WIDTH,
+      0.01,
+      SpawnConfig.LANE_DASH_LENGTH
+    )
+
+    const lineWidth = 0.15
+    this.edgeGeometry = new THREE.BoxGeometry(lineWidth, 0.01, SpawnConfig.EDGE_LINE_SEGMENT_LENGTH)
+    this.leftEdgeX = -(SpawnConfig.ROAD_WIDTH / 2 - lineWidth / 2)
+    this.rightEdgeX = SpawnConfig.ROAD_WIDTH / 2 - lineWidth / 2
+
+    this.dashPool = this.createDashPool()
+    this.leftEdgePool = this.createEdgePool()
+    this.rightEdgePool = this.createEdgePool()
+
     this.createGround()
+    this.populateInitialElements()
+  }
+
+  private createDashPool(): ObjectPool<LaneDash> {
+    return new ObjectPool<LaneDash>(
+      () => {
+        const dash = new LaneDash(this.dashGeometry, this.lineMaterial)
+        dash.deactivate()
+        this.worldContainer.add(dash.object)
+        return dash
+      },
+      LANE_DASH_POOL_SIZE
+    )
+  }
+
+  private createEdgePool(): ObjectPool<EdgeLineSegment> {
+    return new ObjectPool<EdgeLineSegment>(
+      () => {
+        const segment = new EdgeLineSegment(this.edgeGeometry, this.lineMaterial)
+        segment.deactivate()
+        this.worldContainer.add(segment.object)
+        return segment
+      },
+      EDGE_LINE_POOL_SIZE
+    )
   }
 
   private createGround(): void {
@@ -24,10 +144,6 @@ export class Ground {
     this.scene.add(roadPlane)
 
     this.createGrass()
-    this.createLaneMarkings()
-    this.createEdgeLines()
-    this.worldContainer.add(this.laneMarkings)
-    this.worldContainer.add(this.edgeLines)
   }
 
   private createGrass(): void {
@@ -46,56 +162,87 @@ export class Ground {
     this.scene.add(rightGrass)
   }
 
-  private createLaneMarkings(): void {
-    const material = new THREE.MeshBasicMaterial({ color: EnvironmentColors.laneMarking })
-    const dashGeometry = new THREE.BoxGeometry(SpawnConfig.LANE_DASH_WIDTH, 0.01, SpawnConfig.LANE_DASH_LENGTH)
-
-    const dashInterval = SpawnConfig.LANE_DASH_LENGTH + SpawnConfig.LANE_DASH_GAP
-    const numDashes = Math.ceil(SpawnConfig.ROAD_LENGTH / dashInterval) + 5
-
-    for (let i = 0; i < numDashes; i++) {
-      const dash = new THREE.Mesh(dashGeometry, material)
-      dash.position.set(0, 0.01, -SpawnConfig.ROAD_LENGTH / 2 + i * dashInterval)
-      this.laneMarkings.add(dash)
-    }
-  }
-
-  private createEdgeLines(): void {
-    const material = new THREE.MeshBasicMaterial({ color: EnvironmentColors.laneMarking })
-    const lineWidth = 0.15
-    const segmentLength = 5
-    const numSegments = Math.ceil(SpawnConfig.ROAD_LENGTH / segmentLength) + 5
-
-    const leftEdgeX = -(SpawnConfig.ROAD_WIDTH / 2 - lineWidth / 2)
-    const rightEdgeX = SpawnConfig.ROAD_WIDTH / 2 - lineWidth / 2
-
-    const lineGeometry = new THREE.BoxGeometry(lineWidth, 0.01, segmentLength)
-
-    for (let i = 0; i < numSegments; i++) {
-      const leftLine = new THREE.Mesh(lineGeometry, material)
-      leftLine.position.set(leftEdgeX, 0.01, -SpawnConfig.ROAD_LENGTH / 2 + i * segmentLength)
-      this.edgeLines.add(leftLine)
-
-      const rightLine = new THREE.Mesh(lineGeometry, material)
-      rightLine.position.set(rightEdgeX, 0.01, -SpawnConfig.ROAD_LENGTH / 2 + i * segmentLength)
-      this.edgeLines.add(rightLine)
-    }
-  }
-
-  update(_delta: number): void {
+  private populateInitialElements(): void {
     const containerZ = (this.worldContainer as THREE.Group).position.z
-    const wrapDistance = SpawnConfig.DESPAWN_Z - SpawnConfig.SPAWN_Z
+    const dashInterval = SpawnConfig.LANE_DASH_LENGTH + SpawnConfig.LANE_DASH_GAP
 
-    this.laneMarkings.children.forEach((dash) => {
-      while (dash.position.z + containerZ > SpawnConfig.DESPAWN_Z) {
-        dash.position.z -= wrapDistance
-      }
-    })
+    for (let z = SpawnConfig.SPAWN_Z; z <= SpawnConfig.DESPAWN_Z; z += dashInterval) {
+      this.spawnDashAt(z - containerZ)
+    }
 
-    this.edgeLines.children.forEach((line) => {
-      while (line.position.z + containerZ > SpawnConfig.DESPAWN_Z) {
-        line.position.z -= wrapDistance
+    for (let z = SpawnConfig.SPAWN_Z; z <= SpawnConfig.DESPAWN_Z; z += SpawnConfig.EDGE_LINE_SEGMENT_LENGTH) {
+      this.spawnEdgeLinesAt(z - containerZ)
+    }
+  }
+
+  private spawnDashAt(localZ: number): void {
+    const dash = this.dashPool.acquire()
+    if (!dash) return
+    dash.object.position.x = 0
+    dash.object.position.z = localZ
+  }
+
+  private spawnEdgeLinesAt(localZ: number): void {
+    const leftSegment = this.leftEdgePool.acquire()
+    if (leftSegment) {
+      leftSegment.object.position.x = this.leftEdgeX
+      leftSegment.object.position.z = localZ
+    }
+
+    const rightSegment = this.rightEdgePool.acquire()
+    if (rightSegment) {
+      rightSegment.object.position.x = this.rightEdgeX
+      rightSegment.object.position.z = localZ
+    }
+  }
+
+  update(delta: number): void {
+    const containerZ = (this.worldContainer as THREE.Group).position.z
+
+    this.dashSpawnTimer += delta
+    if (this.dashSpawnTimer >= SpawnConfig.LANE_DASH_SPAWN_INTERVAL) {
+      this.spawnDashAt(SpawnConfig.SPAWN_Z - containerZ)
+      this.dashSpawnTimer = 0
+    }
+
+    this.edgeSpawnTimer += delta
+    if (this.edgeSpawnTimer >= SpawnConfig.EDGE_LINE_SPAWN_INTERVAL) {
+      this.spawnEdgeLinesAt(SpawnConfig.SPAWN_Z - containerZ)
+      this.edgeSpawnTimer = 0
+    }
+
+    this.despawnElements(containerZ)
+  }
+
+  private despawnElements(containerZ: number): void {
+    for (const dash of this.dashPool.getActive()) {
+      const worldZ = dash.object.position.z + containerZ
+      if (worldZ > SpawnConfig.DESPAWN_Z) {
+        this.dashPool.release(dash)
       }
-    })
+    }
+
+    for (const segment of this.leftEdgePool.getActive()) {
+      const worldZ = segment.object.position.z + containerZ
+      if (worldZ > SpawnConfig.DESPAWN_Z) {
+        this.leftEdgePool.release(segment)
+      }
+    }
+
+    for (const segment of this.rightEdgePool.getActive()) {
+      const worldZ = segment.object.position.z + containerZ
+      if (worldZ > SpawnConfig.DESPAWN_Z) {
+        this.rightEdgePool.release(segment)
+      }
+    }
+  }
+
+  reset(): void {
+    this.dashPool.releaseAll()
+    this.leftEdgePool.releaseAll()
+    this.rightEdgePool.releaseAll()
+    this.dashSpawnTimer = 0
+    this.edgeSpawnTimer = 0
+    this.populateInitialElements()
   }
 }
