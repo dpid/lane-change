@@ -74,6 +74,7 @@ class Item implements PooledEntity {
 
 class SpawnDeck {
   private deck: GeometryType[] = []
+  private discard: GeometryType[] = []
 
   constructor() {
     this.buildDeck()
@@ -97,12 +98,18 @@ class SpawnDeck {
   }
 
   draw(): GeometryType {
-    const card = this.deck.shift()!
-    this.deck.push(card)
+    if (this.deck.length === 0) {
+      this.deck = this.discard
+      this.discard = []
+      this.shuffle()
+    }
+    const card = this.deck.pop()!
+    this.discard.push(card)
     return card
   }
 
   reset(): void {
+    this.discard = []
     this.buildDeck()
     this.shuffle()
   }
