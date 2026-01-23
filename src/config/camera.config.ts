@@ -11,7 +11,7 @@ export const CameraConfig = {
 
   ZOOM_IN_AMOUNT: 2,
   ZOOM_IN_DELAY: 0.2,
-  ZOOM_IN_DURATION: 0.15,
+  ZOOM_IN_DURATION: 0.25,
   ZOOM_OUT_DELAY: 0.25,
   ZOOM_OUT_DURATION: 0.4
 } as const
