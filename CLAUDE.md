@@ -86,6 +86,14 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 - Hemispherical crash burst on death, intensity scales with scroll speed
 - Config in `src/config/particles.config.ts`
 
+### Celebration Particle System
+
+`CelebrationSystem` emits colorful particle bursts on coin collection:
+- Hemispherical burst of gold/white particles at coin position
+- Particles arc upward with gravity, fading out near end of life
+- Triggered by `ItemManager` when coins are collected
+- Config in `src/config/celebration.config.ts`
+
 ### Wheelie Animation
 
 `MotorcycleAnimator` handles a wheelie animation triggered on coin streak completion:
@@ -114,6 +122,7 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 - `src/systems/Ground.ts` - Road, grass, lane dashes, edge lines (pooled)
 - `src/systems/Background.ts` - Sky and roadside signs (pooled)
 - `src/effects/SmokeSystem.ts` - Exhaust smoke particles (pooled)
+- `src/effects/CelebrationSystem.ts` - Coin collection particle bursts (pooled)
 - `src/effects/WindSystem.ts` - Speed line effect during wheelies (pooled)
 - `src/animation/MotorcycleAnimator.ts` - Motorcycle animations (wheels, lean, wheelie)
 - `src/config/` - All magic numbers extracted to config files
