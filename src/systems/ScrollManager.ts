@@ -5,7 +5,7 @@ export class ScrollManager {
   readonly worldContainer: THREE.Group
   private scrolling: boolean = false
   private coinStreak: number = 0
-  private completedStreaks: number = 0
+  private completedBoosts: number = 0
   private onStreakCompleteCallback: (() => void) | null = null
 
   constructor() {
@@ -17,12 +17,12 @@ export class ScrollManager {
   }
 
   getSpeedMultiplier(): number {
-    const progress = this.completedStreaks / PhysicsConfig.STREAKS_TO_MAX_SPEED
+    const progress = this.completedBoosts / PhysicsConfig.STREAKS_TO_MAX_SPEED
     return 1 + progress * (PhysicsConfig.MAX_SPEED_MULTIPLIER - 1)
   }
 
   isAtMaxSpeed(): boolean {
-    return this.completedStreaks >= PhysicsConfig.STREAKS_TO_MAX_SPEED
+    return this.completedBoosts >= PhysicsConfig.STREAKS_TO_MAX_SPEED
   }
 
   addToWorld(object: THREE.Object3D): void {
@@ -49,17 +49,19 @@ export class ScrollManager {
     return 1 / this.getSpeedMultiplier()
   }
 
-  onCoinCollected(): void {
+  onCoinCollected(): number {
     this.coinStreak++
-    if (this.coinStreak >= PhysicsConfig.COINS_PER_STREAK) {
-      if (this.completedStreaks < PhysicsConfig.STREAKS_TO_MAX_SPEED) {
-        this.completedStreaks++
-      }
-      this.coinStreak = 0
-      if (this.onStreakCompleteCallback) {
-        this.onStreakCompleteCallback()
-      }
+    const points = this.coinStreak * PhysicsConfig.BASE_COIN_POINTS
+
+    if (this.coinStreak % PhysicsConfig.COINS_PER_BOOST === 0) {
+      this.completedBoosts = Math.min(
+        Math.floor(this.coinStreak / PhysicsConfig.COINS_PER_BOOST),
+        PhysicsConfig.STREAKS_TO_MAX_SPEED
+      )
+      this.onStreakCompleteCallback?.()
     }
+
+    return points
   }
 
   onCoinMissed(): void {
@@ -68,7 +70,7 @@ export class ScrollManager {
 
   resetProgression(): void {
     this.coinStreak = 0
-    this.completedStreaks = 0
+    this.completedBoosts = 0
   }
 
   update(delta: number): void {
@@ -81,6 +83,6 @@ export class ScrollManager {
     this.worldContainer.position.set(0, 0, 0)
     this.scrolling = false
     this.coinStreak = 0
-    this.completedStreaks = 0
+    this.completedBoosts = 0
   }
 }

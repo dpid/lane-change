@@ -24,7 +24,6 @@ export enum GameState {
 }
 
 const POINTS_PER_OBSTACLE = 1
-const POINTS_PER_COIN = 5
 const MAX_DELTA = 0.1
 
 export class Game {
@@ -230,10 +229,10 @@ export class Game {
       }
 
       if (result.scoreItems > 0) {
+        let coinPoints = 0
         for (let i = 0; i < result.scoreItems; i++) {
-          this.scrollManager.onCoinCollected()
+          coinPoints += this.scrollManager.onCoinCollected()
         }
-        const coinPoints = result.scoreItems * POINTS_PER_COIN
         this.score += coinPoints
         this.ui.updateScore(this.score)
         this.playFun.addPoints(coinPoints)
