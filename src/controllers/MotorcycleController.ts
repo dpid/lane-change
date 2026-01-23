@@ -3,7 +3,7 @@ import type { CharacterController, CharacterEvent, CharacterEventCallback } from
 import { CharacterState, CharacterEventEmitter } from './CharacterController'
 import { MotorcycleFactory, type GeometryParts } from '../factories'
 import { MotorcycleAnimator, AnimationState, type MotorcycleAnimationContext } from '../animation'
-import { PhysicsConfig } from '../config'
+import { PhysicsConfig, AnimationConfig } from '../config'
 import type { InputAction } from '../input/InputAction'
 import { InputActionType } from '../input/InputAction'
 
@@ -21,6 +21,9 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
 
   private jumpVelocity: number = 0
   private groundY: number = 0
+
+  private flickerTime: number = 0
+  private materials: THREE.MeshStandardMaterial[] = []
 
   get state(): CharacterState {
     return this._state
@@ -47,6 +50,26 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this.geometryParts = this.factory.create()
     this.animator.attach(this.geometryParts)
     this._group.add(this.geometryParts.root)
+    this.setupTransparentMaterials()
+  }
+
+  private setupTransparentMaterials(): void {
+    this.materials = []
+    this.geometryParts.root.traverse((child) => {
+      if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+        const mat = child.material.clone() as THREE.MeshStandardMaterial
+        mat.transparent = true
+        mat.opacity = 1
+        child.material = mat
+        this.materials.push(mat)
+      }
+    })
+  }
+
+  private setOpacity(opacity: number): void {
+    for (const mat of this.materials) {
+      mat.opacity = opacity
+    }
   }
 
   handleAction(action: InputAction): void {
@@ -90,6 +113,7 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this.targetLane = null
     this.isLaneSwitching = false
     this.laneProgress = 0
+    this.flickerTime = 0
     this.rebuildCharacter()
     this.animator.reset()
   }
@@ -220,6 +244,32 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
   }
 
   private updateDying(_delta: number): void {
+  }
+
+  updateInvincibilityFlicker(progress: number, delta: number): void {
+    if (progress >= 1) {
+      this.setOpacity(1)
+      return
+    }
+
+    this.flickerTime += delta
+
+    const flickerPeriod = THREE.MathUtils.lerp(
+      AnimationConfig.INVINCIBILITY_FLICKER_START_PERIOD,
+      AnimationConfig.INVINCIBILITY_FLICKER_END_PERIOD,
+      progress
+    )
+    const minOpacity = THREE.MathUtils.lerp(
+      AnimationConfig.INVINCIBILITY_MIN_OPACITY,
+      1.0,
+      progress
+    )
+
+    const sineValue = Math.sin((this.flickerTime / flickerPeriod) * Math.PI * 2)
+    const normalizedSine = (sineValue + 1) / 2
+    const opacity = THREE.MathUtils.lerp(minOpacity, 1.0, normalizedSine)
+
+    this.setOpacity(opacity)
   }
 
   getPosition(): THREE.Vector3 {

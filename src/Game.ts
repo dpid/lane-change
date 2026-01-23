@@ -270,6 +270,16 @@ export class Game {
       this.cameraController.update(delta, this.motorcycle.group.position.x, this.motorcycle.isWheelieActive())
     }
 
+    if (this.state === GameState.PLAYING) {
+      if (this.isInvincible()) {
+        const elapsed = Date.now() - (this.invincibilityEndTime - PhysicsConfig.INVINCIBILITY_DURATION_MS)
+        const progress = elapsed / PhysicsConfig.INVINCIBILITY_DURATION_MS
+        this.motorcycle.updateInvincibilityFlicker(progress, delta)
+      } else {
+        this.motorcycle.updateInvincibilityFlicker(1, delta)
+      }
+    }
+
     const isEmitting = this.state === GameState.PLAYING
     this.smokeSystem.update(delta, isEmitting, this.scrollManager.getScrollSpeed())
     this.celebrationSystem.update(delta)
