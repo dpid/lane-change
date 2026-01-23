@@ -277,7 +277,7 @@ export class Game {
     this.smokeSystem.update(delta, isEmitting, this.scrollManager.getScrollSpeed())
     this.celebrationSystem.update(delta)
 
-    if (this.motorcycle.isWheelieActive()) {
+    if (this.state === GameState.PLAYING && this.motorcycle.isWheelieActive()) {
       this.windSystem.startEffect()
     } else {
       this.windSystem.stopEffect()
