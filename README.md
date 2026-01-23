@@ -4,7 +4,7 @@ A motorcycle endless runner game built with Three.js and TypeScript.
 
 ## Gameplay
 
-Switch lanes to avoid obstacles and collect coins. Collect 3 coins in a row to complete a streak, increase your speed, and trigger a wheelie. Complete 10 streaks to reach maximum speed. How far can you go?
+Switch lanes to avoid obstacles and collect coins. Collect 3 coins in a row to complete a streak, increase your speed, and trigger a wheelie. Complete 10 streaks to reach maximum speed. You have 3 seconds of invincibility when you start - use it to get your bearings!
 
 **Controls:**
 - **Space** - Switch lanes
