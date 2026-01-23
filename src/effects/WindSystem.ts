@@ -1,22 +1,19 @@
 import * as THREE from 'three'
 import { WindConfig } from '../config'
+import { BaseParticleSystem, type BaseParticle } from './BaseParticleSystem'
 
-interface WindParticle {
-  mesh: THREE.Mesh
-  velocity: THREE.Vector3
-  life: number
+interface WindParticle extends BaseParticle {
   maxLife: number
-  active: boolean
   initialOpacity: number
 }
 
-export class WindSystem {
-  private particles: WindParticle[] = []
+export class WindSystem extends BaseParticleSystem<WindParticle> {
   private motorcycleGroup: THREE.Group | null = null
   private timeSinceEmit: number = 0
   private isActive: boolean = false
 
   constructor(scene: THREE.Scene) {
+    super()
     const geometry = new THREE.BoxGeometry(
       WindConfig.LINE_WIDTH,
       WindConfig.LINE_HEIGHT,
@@ -109,27 +106,9 @@ export class WindSystem {
     ;(particle.mesh.material as THREE.MeshBasicMaterial).opacity = particle.initialOpacity
   }
 
-  reset(): void {
-    for (const particle of this.particles) {
-      this.deactivateParticle(particle)
-    }
+  override reset(): void {
+    super.reset()
     this.timeSinceEmit = 0
     this.isActive = false
-  }
-
-  private acquireParticle(): WindParticle | null {
-    for (const particle of this.particles) {
-      if (!particle.active) {
-        particle.active = true
-        particle.mesh.visible = true
-        return particle
-      }
-    }
-    return null
-  }
-
-  private deactivateParticle(particle: WindParticle): void {
-    particle.active = false
-    particle.mesh.visible = false
   }
 }

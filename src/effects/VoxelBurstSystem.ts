@@ -1,22 +1,19 @@
 import * as THREE from 'three'
 import { VoxelBurstConfig } from '../config'
 import type { VoxelData } from '../loaders/AssetLoader'
+import { BaseParticleSystem, type BaseParticle } from './BaseParticleSystem'
 
-interface VoxelParticle {
-  mesh: THREE.Mesh
-  velocity: THREE.Vector3
+interface VoxelParticle extends BaseParticle {
   angularVelocity: THREE.Vector3
-  life: number
-  active: boolean
 }
 
-export class VoxelBurstSystem {
-  private particles: VoxelParticle[] = []
+export class VoxelBurstSystem extends BaseParticleSystem<VoxelParticle> {
   private geometry: THREE.BoxGeometry
   private activeBurst = false
   private onCompleteCallback: (() => void) | null = null
 
   constructor(scene: THREE.Scene) {
+    super()
     this.geometry = new THREE.BoxGeometry(
       VoxelBurstConfig.VOXEL_SIZE,
       VoxelBurstConfig.VOXEL_SIZE,
@@ -154,16 +151,9 @@ export class VoxelBurstSystem {
     }
   }
 
-  reset(): void {
-    for (const particle of this.particles) {
-      this.deactivateParticle(particle)
-    }
+  override reset(): void {
+    super.reset()
     this.activeBurst = false
     this.onCompleteCallback = null
-  }
-
-  private deactivateParticle(particle: VoxelParticle): void {
-    particle.active = false
-    particle.mesh.visible = false
   }
 }

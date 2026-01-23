@@ -1,5 +1,4 @@
-const FADE_INTERVAL_MS = 50
-const STORAGE_KEY = 'musicMuted'
+import { AudioConfig } from '../config'
 
 export class AudioManager {
   private audio: HTMLAudioElement
@@ -10,7 +9,7 @@ export class AudioManager {
     this.audio = new Audio('./soundtrack.mp3')
     this.audio.loop = true
     this.audio.preload = 'auto'
-    this._muted = localStorage.getItem(STORAGE_KEY) === 'true'
+    this._muted = localStorage.getItem(AudioConfig.STORAGE_KEY) === 'true'
     this.audio.muted = this._muted
   }
 
@@ -34,7 +33,7 @@ export class AudioManager {
       clearInterval(this.fadeInterval)
     }
 
-    const steps = duration / FADE_INTERVAL_MS
+    const steps = duration / AudioConfig.FADE_INTERVAL_MS
     const volumeStep = this.audio.volume / steps
 
     this.fadeInterval = window.setInterval(() => {
@@ -49,13 +48,13 @@ export class AudioManager {
       } else {
         this.audio.volume = newVolume
       }
-    }, FADE_INTERVAL_MS)
+    }, AudioConfig.FADE_INTERVAL_MS)
   }
 
   setMuted(muted: boolean): void {
     this._muted = muted
     this.audio.muted = muted
-    localStorage.setItem(STORAGE_KEY, String(muted))
+    localStorage.setItem(AudioConfig.STORAGE_KEY, String(muted))
   }
 
   isMuted(): boolean {

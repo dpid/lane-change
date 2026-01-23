@@ -3,6 +3,7 @@ import type { AnimationController } from './AnimationController'
 import { AnimationState } from './AnimationController'
 import type { GeometryParts } from '../factories'
 import { AnimationConfig, PhysicsConfig } from '../config'
+import { smoothstep } from '../utils/easing'
 
 export interface MotorcycleAnimationContext {
   targetLane: 'left' | 'right' | null
@@ -98,14 +99,12 @@ export class MotorcycleAnimator implements AnimationController {
 
     if (this.wheelieTime < WHEELIE_EASE_IN_TIME) {
       const t = this.wheelieTime / WHEELIE_EASE_IN_TIME
-      const eased = t * t * (3 - 2 * t)
-      this.currentWheelieAngle = WHEELIE_ANGLE * eased
+      this.currentWheelieAngle = WHEELIE_ANGLE * smoothstep(t)
     } else if (this.wheelieTime < sustainEnd) {
       this.currentWheelieAngle = WHEELIE_ANGLE
     } else if (this.wheelieTime < WHEELIE_DURATION) {
       const t = (this.wheelieTime - sustainEnd) / WHEELIE_EASE_OUT_TIME
-      const eased = t * t * (3 - 2 * t)
-      this.currentWheelieAngle = WHEELIE_ANGLE * (1 - eased)
+      this.currentWheelieAngle = WHEELIE_ANGLE * (1 - smoothstep(t))
     } else {
       this.wheelieActive = false
       this.wheelieTime = 0

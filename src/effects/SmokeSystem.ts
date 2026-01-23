@@ -1,21 +1,18 @@
 import * as THREE from 'three'
 import { ParticlesConfig } from '../config'
+import { BaseParticleSystem, type BaseParticle } from './BaseParticleSystem'
 
-interface SmokeParticle {
-  mesh: THREE.Mesh
-  velocity: THREE.Vector3
-  life: number
+interface SmokeParticle extends BaseParticle {
   maxLife: number
-  active: boolean
   initialOpacity: number
 }
 
-export class SmokeSystem {
-  private particles: SmokeParticle[] = []
+export class SmokeSystem extends BaseParticleSystem<SmokeParticle> {
   private motorcycleGroup: THREE.Group | null = null
   private timeSinceEmit: number = 0
 
   constructor(scene: THREE.Scene) {
+    super()
     const geometry = new THREE.BoxGeometry(
       ParticlesConfig.PARTICLE_SIZE,
       ParticlesConfig.PARTICLE_SIZE,
@@ -154,26 +151,8 @@ export class SmokeSystem {
     }
   }
 
-  reset(): void {
-    for (const particle of this.particles) {
-      this.deactivateParticle(particle)
-    }
+  override reset(): void {
+    super.reset()
     this.timeSinceEmit = 0
-  }
-
-  private acquireParticle(): SmokeParticle | null {
-    for (const particle of this.particles) {
-      if (!particle.active) {
-        particle.active = true
-        particle.mesh.visible = true
-        return particle
-      }
-    }
-    return null
-  }
-
-  private deactivateParticle(particle: SmokeParticle): void {
-    particle.active = false
-    particle.mesh.visible = false
   }
 }

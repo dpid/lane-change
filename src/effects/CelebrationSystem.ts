@@ -1,19 +1,14 @@
 import * as THREE from 'three'
 import { CelebrationConfig } from '../config'
+import { BaseParticleSystem, type BaseParticle } from './BaseParticleSystem'
 
-interface CelebrationParticle {
-  mesh: THREE.Mesh
-  velocity: THREE.Vector3
-  life: number
-  active: boolean
-}
+interface CelebrationParticle extends BaseParticle {}
 
-export class CelebrationSystem {
-  private particles: CelebrationParticle[] = []
+export class CelebrationSystem extends BaseParticleSystem<CelebrationParticle> {
   private geometry: THREE.BoxGeometry
-  private nextParticleIndex: number = 0
 
   constructor(scene: THREE.Scene) {
+    super()
     this.geometry = new THREE.BoxGeometry(
       CelebrationConfig.PARTICLE_SIZE,
       CelebrationConfig.PARTICLE_SIZE,
@@ -43,12 +38,8 @@ export class CelebrationSystem {
 
   emitBurst(position: THREE.Vector3): void {
     for (let i = 0; i < CelebrationConfig.PARTICLES_PER_BURST; i++) {
-      const particle = this.particles[this.nextParticleIndex]
-      this.nextParticleIndex = (this.nextParticleIndex + 1) % CelebrationConfig.POOL_SIZE
-
-      if (particle.active) {
-        this.deactivateParticle(particle)
-      }
+      const particle = this.acquireParticle()
+      if (!particle) continue
 
       particle.mesh.position.copy(position)
 
@@ -69,8 +60,6 @@ export class CelebrationSystem {
       )
 
       particle.life = 0
-      particle.active = true
-      particle.mesh.visible = true
     }
   }
 
@@ -98,17 +87,5 @@ export class CelebrationSystem {
         this.deactivateParticle(particle)
       }
     }
-  }
-
-  reset(): void {
-    for (const particle of this.particles) {
-      this.deactivateParticle(particle)
-    }
-    this.nextParticleIndex = 0
-  }
-
-  private deactivateParticle(particle: CelebrationParticle): void {
-    particle.active = false
-    particle.mesh.visible = false
   }
 }

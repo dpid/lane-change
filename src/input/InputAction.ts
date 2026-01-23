@@ -1,7 +1,5 @@
 export enum InputActionType {
-  SWITCH_LANE = 'SWITCH_LANE',
-  START = 'START',
-  RESTART = 'RESTART'
+  SWITCH_LANE = 'SWITCH_LANE'
 }
 
 export interface InputAction {

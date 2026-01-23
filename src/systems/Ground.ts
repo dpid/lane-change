@@ -1,7 +1,8 @@
 import * as THREE from 'three'
-import { EnvironmentColors, SpawnConfig } from '../config'
+import { EnvironmentColors, SpawnConfig, PoolConfig } from '../config'
 import { ObjectPool, type PooledEntity } from '../pooling'
 import type { ScrollManager } from './ScrollManager'
+import { shouldDespawn, getLocalSpawnZ, getWorldZ } from '../utils/spawnable'
 
 class LaneDash implements PooledEntity {
   private mesh: THREE.Mesh
@@ -67,9 +68,6 @@ class EdgeLineSegment implements PooledEntity {
   }
 }
 
-const LANE_DASH_POOL_SIZE = 20
-const EDGE_LINE_POOL_SIZE = 15
-
 export class Ground {
   private scene: THREE.Scene
   private worldContainer: THREE.Object3D
@@ -122,7 +120,7 @@ export class Ground {
         this.worldContainer.add(dash.object)
         return dash
       },
-      LANE_DASH_POOL_SIZE
+      PoolConfig.LANE_DASH_POOL_SIZE
     )
   }
 
@@ -134,7 +132,7 @@ export class Ground {
         this.worldContainer.add(segment.object)
         return segment
       },
-      EDGE_LINE_POOL_SIZE
+      PoolConfig.EDGE_LINE_POOL_SIZE
     )
   }
 
@@ -207,13 +205,13 @@ export class Ground {
 
     this.dashSpawnTimer += delta
     if (this.dashSpawnTimer >= SpawnConfig.LANE_DASH_SPAWN_INTERVAL * intervalMultiplier) {
-      this.spawnDashAt(SpawnConfig.FAR_BOUND_Z - containerZ)
+      this.spawnDashAt(getLocalSpawnZ(containerZ))
       this.dashSpawnTimer = 0
     }
 
     this.edgeSpawnTimer += delta
     if (this.edgeSpawnTimer >= SpawnConfig.EDGE_LINE_SPAWN_INTERVAL * intervalMultiplier) {
-      this.spawnEdgeLinesAt(SpawnConfig.FAR_BOUND_Z - containerZ)
+      this.spawnEdgeLinesAt(getLocalSpawnZ(containerZ))
       this.edgeSpawnTimer = 0
     }
 
@@ -222,22 +220,19 @@ export class Ground {
 
   private despawnElements(containerZ: number): void {
     for (const dash of this.dashPool.getActive()) {
-      const worldZ = dash.object.position.z + containerZ
-      if (worldZ > SpawnConfig.NEAR_BOUND_Z) {
+      if (shouldDespawn(getWorldZ(dash.object.position.z, containerZ))) {
         this.dashPool.release(dash)
       }
     }
 
     for (const segment of this.leftEdgePool.getActive()) {
-      const worldZ = segment.object.position.z + containerZ
-      if (worldZ > SpawnConfig.NEAR_BOUND_Z) {
+      if (shouldDespawn(getWorldZ(segment.object.position.z, containerZ))) {
         this.leftEdgePool.release(segment)
       }
     }
 
     for (const segment of this.rightEdgePool.getActive()) {
-      const worldZ = segment.object.position.z + containerZ
-      if (worldZ > SpawnConfig.NEAR_BOUND_Z) {
+      if (shouldDespawn(getWorldZ(segment.object.position.z, containerZ))) {
         this.rightEdgePool.release(segment)
       }
     }

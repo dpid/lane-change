@@ -1,120 +1,11 @@
 import * as THREE from 'three'
-import { AnimationConfig, PhysicsConfig, SpawnConfig } from '../config'
+import { PhysicsConfig, SpawnConfig, PoolConfig } from '../config'
 import { GeometryType, EffectType, ItemDefinitions } from '../config/items.config'
-import { ItemFactory, type GeometryParts } from '../factories'
-import { ObjectPool, type PooledEntity } from '../pooling'
+import { ItemFactory } from '../factories'
+import { ObjectPool } from '../pooling'
 import type { ScrollManager } from './ScrollManager'
-
-class Item implements PooledEntity {
-  geometryType: GeometryType
-  effectType: EffectType
-  lane: 'left' | 'right' = 'right'
-  passed: boolean = false
-  collected: boolean = false
-  velocity: number = 0
-  private geometryParts: GeometryParts
-  private _active: boolean = false
-  private rotation: number = 0
-  private rotates: boolean
-  private collisionModifier: number
-
-  get active(): boolean {
-    return this._active
-  }
-
-  get group(): THREE.Group {
-    return this.geometryParts.root
-  }
-
-  constructor(geometryType: GeometryType, factory: ItemFactory) {
-    this.geometryType = geometryType
-    const definition = ItemDefinitions[geometryType]
-    this.effectType = definition.effectType
-    this.rotates = definition.rotates
-    this.collisionModifier = definition.collisionModifier
-    this.geometryParts = factory.create({ geometryType })
-  }
-
-  activate(): void {
-    this._active = true
-    this.group.visible = true
-  }
-
-  deactivate(): void {
-    this._active = false
-    this.group.visible = false
-  }
-
-  reset(): void {
-    this.passed = false
-    this.collected = false
-    this.rotation = 0
-    this.group.position.set(0, 0, 0)
-    this.group.rotation.set(0, 0, 0)
-  }
-
-  updateRotation(delta: number): void {
-    if (this.rotates) {
-      this.rotation += AnimationConfig.COIN_ROTATION_SPEED * delta
-      this.group.rotation.y = this.rotation
-    }
-  }
-
-  getBoundingBox(): THREE.Box3 {
-    const box = new THREE.Box3().setFromObject(this.group)
-    if (this.collisionModifier < 0) {
-      box.min.subScalar(this.collisionModifier)
-      box.max.addScalar(this.collisionModifier)
-    } else {
-      box.min.subScalar(this.collisionModifier)
-      box.max.addScalar(this.collisionModifier)
-    }
-    return box
-  }
-}
-
-class SpawnDeck {
-  private deck: GeometryType[] = []
-  private discard: GeometryType[] = []
-
-  constructor() {
-    this.buildDeck()
-    this.shuffle()
-  }
-
-  private buildDeck(): void {
-    this.deck = []
-    for (const definition of Object.values(ItemDefinitions)) {
-      for (let i = 0; i < definition.cardCount; i++) {
-        this.deck.push(definition.geometryType)
-      }
-    }
-  }
-
-  private shuffle(): void {
-    for (let i = this.deck.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]]
-    }
-  }
-
-  draw(): GeometryType {
-    if (this.deck.length === 0) {
-      this.deck = this.discard
-      this.discard = []
-      this.shuffle()
-    }
-    const card = this.deck.pop()!
-    this.discard.push(card)
-    return card
-  }
-
-  reset(): void {
-    this.discard = []
-    this.buildDeck()
-    this.shuffle()
-  }
-}
+import { Item } from './Item'
+import { SpawnDeck } from './SpawnDeck'
 
 export interface CollisionResult {
   killed: boolean
@@ -143,9 +34,6 @@ export class ItemManager {
   }
 
   private initializePools(): void {
-    const INITIAL_POOL_SIZE = 5
-    const MAX_POOL_SIZE = 15
-
     for (const geometryType of Object.values(GeometryType)) {
       if (geometryType === GeometryType.NONE) continue
       const pool = new ObjectPool<Item>(
@@ -155,8 +43,8 @@ export class ItemManager {
           this.container.add(item.group)
           return item
         },
-        INITIAL_POOL_SIZE,
-        MAX_POOL_SIZE
+        PoolConfig.ITEM_INITIAL_POOL_SIZE,
+        PoolConfig.ITEM_MAX_POOL_SIZE
       )
       this.pools.set(geometryType, pool)
     }

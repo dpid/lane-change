@@ -53,11 +53,24 @@ All spawned entities use object pools to avoid GC pressure. Pools pre-allocate o
 
 ### Spawn Deck System
 
-Items are spawned using a deck-based system (`SpawnDeck` in `ItemManager.ts`):
+Items are spawned using a deck-based system (`SpawnDeck` class in `src/systems/SpawnDeck.ts`):
 - A deck is built from `ItemDefinitions` card counts (e.g., 80 obstacles, 30 coins, 10 gaps)
 - Cards are drawn and placed in a discard pile
 - When the deck is empty, the discard pile is shuffled back into the deck
 - This ensures consistent item distribution while varying order each cycle
+
+### Particle Systems
+
+All particle systems extend `BaseParticleSystem` which provides:
+- Round-robin particle acquisition for efficient reuse
+- Common deactivate/reset patterns
+- Generic particle interface with `active`, `life`, `mesh`, and `velocity` fields
+
+Concrete implementations:
+- `SmokeSystem` - exhaust and crash burst particles
+- `CelebrationSystem` - coin collection bursts
+- `WindSystem` - speed lines during wheelies
+- `VoxelBurstSystem` - death explosion with voxel colors
 
 ### Asset Loading
 
@@ -114,15 +127,15 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 - Short lifetime (0.25s) with opacity fade in final 30%
 - Config in `src/config/wind.config.ts`
 
-### Camera Zoom
+### Camera Controller
 
-`Game.ts` handles a camera zoom effect during wheelies:
-- Camera moves closer (Z decreases by 2 units) when wheelie starts
+`CameraController` handles camera spring physics and zoom effects:
+- Spring-based horizontal tracking follows motorcycle during lane switches
+- Zoom effect during wheelies (camera moves closer by 2 units)
 - Quick zoom in (0.15s) with smoothstep easing
-- Stays zoomed while wheelie is active
 - Delayed zoom out (0.25s delay) after wheelie ends
 - Smooth zoom out (0.4s) back to base position
-- Respects aspect ratio adjustments via `cameraBaseZ`
+- Respects aspect ratio adjustments via dynamic base Z calculation
 - Config in `src/config/camera.config.ts`
 
 ### Audio System
@@ -135,18 +148,46 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 
 ## Key Files
 
+### Core
 - `src/Game.ts` - Main game loop and state management (async init)
 - `src/loaders/AssetLoader.ts` - VOX model loading and caching
+
+### Systems
 - `src/systems/ScrollManager.ts` - World container, scroll control, streak tracking
-- `src/systems/ItemManager.ts` - Item spawning, pooling, collision (deck-based)
+- `src/systems/CameraController.ts` - Camera spring physics and zoom effects
+- `src/systems/ItemManager.ts` - Item spawning, pooling, collision
+- `src/systems/Item.ts` - Item entity class
+- `src/systems/SpawnDeck.ts` - Deck-based spawn distribution
 - `src/systems/Ground.ts` - Road, grass, lane dashes, edge lines (pooled)
 - `src/systems/Background.ts` - Sky and roadside signs (pooled)
+
+### Effects
+- `src/effects/BaseParticleSystem.ts` - Abstract base for particle systems
 - `src/effects/SmokeSystem.ts` - Exhaust smoke particles (pooled)
 - `src/effects/CelebrationSystem.ts` - Coin collection particle bursts (pooled)
 - `src/effects/WindSystem.ts` - Speed line effect during wheelies (pooled)
+- `src/effects/VoxelBurstSystem.ts` - Death explosion with voxel colors
+
+### Animation & Audio
 - `src/animation/MotorcycleAnimator.ts` - Motorcycle animations (wheels, lean, wheelie)
 - `src/audio/AudioManager.ts` - Background music with mute toggle
+
+### Utilities
+- `src/utils/easing.ts` - Smoothstep easing function
+- `src/utils/spawnable.ts` - Spawn/despawn coordinate helpers
+- `src/utils/textures.ts` - Canvas-based texture generation
+
+### Config
 - `src/config/` - All magic numbers extracted to config files
+  - `physics.config.ts` - Lane positions, speeds, gravity
+  - `spawn.config.ts` - Spawn zones, intervals, bounds
+  - `animation.config.ts` - Animation timings, angles
+  - `pool.config.ts` - Pool sizes for all pooled entities
+  - `factory.config.ts` - Factory constants (vox scales, offsets)
+  - `audio.config.ts` - Audio fade settings
+  - `input.config.ts` - Input debounce settings
+
+### Assets
 - `public/models/` - MagicaVoxel .vox assets
 
 ## Game States

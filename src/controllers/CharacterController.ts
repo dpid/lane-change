@@ -1,12 +1,6 @@
 import * as THREE from 'three'
 import type { InputAction } from '../input/InputAction'
 
-export interface LostGeometryData {
-  geometry: THREE.Group
-  worldPosition: THREE.Vector3
-  worldQuaternion: THREE.Quaternion
-}
-
 export enum CharacterState {
   IDLE = 'IDLE',
   DROPPING = 'DROPPING',

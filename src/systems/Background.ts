@@ -1,8 +1,9 @@
 import * as THREE from 'three'
-import { EnvironmentColors, SpawnConfig } from '../config'
+import { EnvironmentColors, SpawnConfig, PoolConfig } from '../config'
 import { SceneryFactory, SceneryType } from '../factories/SceneryFactory'
 import { ObjectPool, type PooledEntity } from '../pooling'
 import type { ScrollManager } from './ScrollManager'
+import { shouldDespawn, getLocalSpawnZ, getWorldZ } from '../utils/spawnable'
 
 class RoadsideSign implements PooledEntity {
   private group: THREE.Group
@@ -36,8 +37,6 @@ class RoadsideSign implements PooledEntity {
   }
 }
 
-const SIGN_POOL_SIZE = 5
-
 export class Background {
   private scene: THREE.Scene
   private worldContainer: THREE.Object3D
@@ -67,7 +66,7 @@ export class Background {
         this.worldContainer.add(sign.object)
         return sign
       },
-      SIGN_POOL_SIZE
+      PoolConfig.SIGN_POOL_SIZE
     )
   }
 
@@ -113,7 +112,7 @@ export class Background {
 
   private spawnInitialSign(): void {
     const containerZ = (this.worldContainer as THREE.Group).position.z
-    this.spawnSignAt(SpawnConfig.FAR_BOUND_Z - containerZ)
+    this.spawnSignAt(getLocalSpawnZ(containerZ))
   }
 
   private spawnSignAt(localZ: number): void {
@@ -131,13 +130,12 @@ export class Background {
     this.signSpawnTimer += delta
     const signInterval = SpawnConfig.SIGN_SPAWN_INTERVAL * this.scrollManager.getSpawnIntervalMultiplier()
     if (this.signSpawnTimer >= signInterval) {
-      this.spawnSignAt(SpawnConfig.FAR_BOUND_Z - containerZ)
+      this.spawnSignAt(getLocalSpawnZ(containerZ))
       this.signSpawnTimer = 0
     }
 
     for (const sign of this.signPool.getActive()) {
-      const worldZ = sign.object.position.z + containerZ
-      if (worldZ > SpawnConfig.NEAR_BOUND_Z) {
+      if (shouldDespawn(getWorldZ(sign.object.position.z, containerZ))) {
         this.signPool.release(sign)
       }
     }

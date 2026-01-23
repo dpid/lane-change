@@ -1,9 +1,7 @@
 import * as THREE from 'three'
 import { GeometryFactory, GeometryParts, disposeGeometryParts } from './GeometryFactory'
 import { AssetLoader } from '../loaders'
-
-const VOX_SCALE = 0.04
-const VOX_Y_OFFSET = 0.6
+import { MotorcycleFactoryConfig } from '../config'
 
 export class MotorcycleFactory implements GeometryFactory<void> {
   create(): GeometryParts {
@@ -14,9 +12,9 @@ export class MotorcycleFactory implements GeometryFactory<void> {
     parts.set('bodyPivot', bodyPivot)
 
     const voxModel = AssetLoader.getInstance().getModel('motorcycle')
-    voxModel.scale.setScalar(VOX_SCALE)
+    voxModel.scale.setScalar(MotorcycleFactoryConfig.VOX_SCALE)
     voxModel.rotation.y = Math.PI
-    voxModel.position.y = VOX_Y_OFFSET
+    voxModel.position.y = MotorcycleFactoryConfig.VOX_Y_OFFSET
 
     bodyPivot.add(voxModel)
     root.add(bodyPivot)

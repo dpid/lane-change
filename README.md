@@ -7,7 +7,7 @@ A motorcycle endless runner game built with Three.js and TypeScript.
 Switch lanes to avoid obstacles and collect coins. Collect 3 coins in a row to complete a streak, increase your speed, and trigger a wheelie. Complete 10 streaks to reach maximum speed. How far can you go?
 
 **Controls:**
-- **Space/Enter** - Switch lanes
+- **Space** - Switch lanes
 - **Mouse click** - Switch lanes
 - **Touch** - Switch lanes (mobile)
 - **M** - Toggle music mute
@@ -61,21 +61,27 @@ src/
 ├── Game.ts          # Main game loop and state management
 ├── animation/       # Visual animations
 ├── audio/           # Background music and sound effects
-├── config/          # Game constants (physics, spawn, animation)
+├── config/          # Game constants (physics, spawn, animation, pools)
 ├── controllers/     # Motorcycle control
 ├── factories/       # Entity creation (obstacles, powerups, scenery)
 ├── loaders/         # Asset loading (VOX models)
 ├── systems/         # Game systems
 │   ├── ScrollManager.ts    # World container and scroll control
-│   ├── ItemManager.ts      # Item spawning and collision (deck-based)
+│   ├── CameraController.ts # Camera spring physics and zoom
+│   ├── ItemManager.ts      # Item spawning and collision
+│   ├── Item.ts             # Item entity class
+│   ├── SpawnDeck.ts        # Deck-based spawn distribution
 │   ├── Background.ts       # Sky and roadside signs (pooled)
 │   └── Ground.ts           # Road, grass, lane markings (pooled)
 ├── effects/         # Visual effects
+│   ├── BaseParticleSystem.ts # Abstract base for particles
 │   ├── SmokeSystem.ts      # Exhaust smoke particles (pooled)
 │   ├── CelebrationSystem.ts # Coin collection bursts (pooled)
-│   └── WindSystem.ts       # Speed lines during wheelies (pooled)
+│   ├── WindSystem.ts       # Speed lines during wheelies (pooled)
+│   └── VoxelBurstSystem.ts # Death explosion effect
 ├── input/           # Input handling (keyboard, mouse, touch)
 ├── pooling/         # Object pooling for performance
+├── utils/           # Shared utilities (easing, textures)
 └── ui/              # User interface
 ```
 

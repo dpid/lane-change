@@ -121,7 +121,11 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
 
   triggerVoxelBurst(): THREE.Matrix4 {
     this._group.updateMatrixWorld()
-    const bodyPivot = this.geometryParts.parts.get('bodyPivot') as THREE.Group
+    const bodyPivot = this.geometryParts.parts.get('bodyPivot') as THREE.Group | undefined
+    if (!bodyPivot || bodyPivot.children.length === 0) {
+      this._group.visible = false
+      return this._group.matrixWorld.clone()
+    }
     bodyPivot.children[0].updateMatrixWorld()
     const worldMatrix = bodyPivot.children[0].matrixWorld.clone()
     this._group.visible = false

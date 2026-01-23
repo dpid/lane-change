@@ -1,7 +1,6 @@
 import type { InputProvider, InputActionCallback } from './InputProvider'
 import { InputActionType, createAction } from './InputAction'
-
-const DEBOUNCE_WINDOW_MS = 50
+import { InputConfig } from '../config'
 
 export class PlayerInputProvider implements InputProvider {
   private _enabled: boolean = false
@@ -22,9 +21,6 @@ export class PlayerInputProvider implements InputProvider {
       if (e.code === 'Space') {
         e.preventDefault()
         this.emitSwitchLane()
-      } else if (e.code === 'Enter') {
-        e.preventDefault()
-        this.emitStart()
       }
     }
   }
@@ -63,16 +59,9 @@ export class PlayerInputProvider implements InputProvider {
     this.callbacks.forEach((callback) => callback(action))
   }
 
-  private emitStart(): void {
-    if (!this.shouldEmit()) return
-
-    const action = createAction(InputActionType.START)
-    this.callbacks.forEach((callback) => callback(action))
-  }
-
   private shouldEmit(): boolean {
     const now = Date.now()
-    if (now - this.lastActionTime < DEBOUNCE_WINDOW_MS) {
+    if (now - this.lastActionTime < InputConfig.DEBOUNCE_WINDOW_MS) {
       return false
     }
     this.lastActionTime = now

@@ -4,6 +4,7 @@ import { ItemManager } from './systems/ItemManager'
 import { Background } from './systems/Background'
 import { Ground } from './systems/Ground'
 import { ScrollManager } from './systems/ScrollManager'
+import { CameraController } from './systems/CameraController'
 import { UI } from './ui/UI'
 import { InputManager } from './input/InputManager'
 import { PlayerInputProvider } from './input/PlayerInputProvider'
@@ -45,14 +46,10 @@ export class Game {
   private windSystem!: WindSystem
   private playFun!: PlayFunManager
   private audioManager!: AudioManager
+  private cameraController!: CameraController
 
   private state: GameState = GameState.MENU
   private score: number = 0
-  private cameraVelocityX: number = 0
-  private cameraBaseZ: number = CameraConfig.BASE_Z
-  private cameraZoomProgress: number = 0
-  private cameraZoomDelayTimer: number = 0
-  private wasWheelieActive: boolean = false
 
   constructor() {
     const canvas = document.getElementById('game') as HTMLCanvasElement
@@ -74,7 +71,8 @@ export class Game {
     const aspect = window.innerWidth / window.innerHeight
     this.camera = new THREE.PerspectiveCamera(CameraConfig.FOV, aspect, CameraConfig.NEAR, CameraConfig.FAR)
     this.camera.position.set(0, CameraConfig.BASE_Y, CameraConfig.BASE_Z)
-    this.updateCameraForAspect(aspect)
+    this.cameraController = new CameraController(this.camera)
+    this.cameraController.updateForAspect(aspect)
     this.camera.lookAt(0, CameraConfig.LOOK_AT_Y, 0)
 
     this.clock = new THREE.Clock()
@@ -98,58 +96,9 @@ export class Game {
       const aspect = window.innerWidth / window.innerHeight
       this.camera.aspect = aspect
       this.camera.updateProjectionMatrix()
-      this.updateCameraForAspect(aspect)
+      this.cameraController.updateForAspect(aspect)
       this.renderer.setSize(window.innerWidth, window.innerHeight)
     })
-  }
-
-  private updateCameraForAspect(aspect: number): void {
-    const fovRadians = (CameraConfig.FOV * Math.PI) / 180
-    const halfFovTan = Math.tan(fovRadians / 2)
-    const horizontalHalfFovTan = halfFovTan * aspect
-
-    const requiredZ = CameraConfig.MIN_VISIBLE_HALF_WIDTH / horizontalHalfFovTan
-    this.cameraBaseZ = Math.max(requiredZ, CameraConfig.BASE_Z)
-
-    const p = this.cameraZoomProgress
-    const easedZoom = p * p * (3 - 2 * p)
-    this.camera.position.z = this.cameraBaseZ - CameraConfig.ZOOM_IN_AMOUNT * easedZoom
-  }
-
-  private updateCamera(delta: number): void {
-    const targetX = this.motorcycle.group.position.x
-    const displacement = targetX - this.camera.position.x
-
-    const springForce = CameraConfig.SPRING_STIFFNESS * displacement
-    const dampingForce = CameraConfig.SPRING_DAMPING * this.cameraVelocityX
-
-    this.cameraVelocityX += (springForce - dampingForce) * delta
-    this.camera.position.x += this.cameraVelocityX * delta
-    this.camera.lookAt(this.camera.position.x, CameraConfig.LOOK_AT_Y, 0)
-
-    const wheelieActive = this.motorcycle.isWheelieActive()
-
-    if (wheelieActive && !this.wasWheelieActive) {
-      this.cameraZoomDelayTimer = 0
-    }
-
-    if (!wheelieActive && this.wasWheelieActive) {
-      this.cameraZoomDelayTimer = CameraConfig.ZOOM_OUT_DELAY
-    }
-
-    this.wasWheelieActive = wheelieActive
-
-    if (wheelieActive) {
-      this.cameraZoomProgress = Math.min(1, this.cameraZoomProgress + delta / CameraConfig.ZOOM_IN_DURATION)
-    } else if (this.cameraZoomDelayTimer > 0) {
-      this.cameraZoomDelayTimer -= delta
-    } else if (this.cameraZoomProgress > 0) {
-      this.cameraZoomProgress = Math.max(0, this.cameraZoomProgress - delta / CameraConfig.ZOOM_OUT_DURATION)
-    }
-
-    const p = this.cameraZoomProgress
-    const easedZoom = p * p * (3 - 2 * p)
-    this.camera.position.z = this.cameraBaseZ - CameraConfig.ZOOM_IN_AMOUNT * easedZoom
   }
 
   async init(): Promise<void> {
@@ -234,13 +183,7 @@ export class Game {
     this.voxelBurstSystem.reset()
     this.celebrationSystem.reset()
     this.windSystem.reset()
-    this.camera.position.x = 0
-    this.camera.lookAt(0, CameraConfig.LOOK_AT_Y, 0)
-    this.cameraVelocityX = 0
-    this.cameraZoomProgress = 0
-    this.cameraZoomDelayTimer = 0
-    this.wasWheelieActive = false
-    this.camera.position.z = this.cameraBaseZ
+    this.cameraController.reset()
     this.startGame()
   }
 
@@ -317,7 +260,7 @@ export class Game {
 
     if (this.state === GameState.DROPPING || this.state === GameState.PLAYING || this.state === GameState.DYING) {
       this.motorcycle.update(delta, this.scrollManager.getSpeedMultiplier())
-      this.updateCamera(delta)
+      this.cameraController.update(delta, this.motorcycle.group.position.x, this.motorcycle.isWheelieActive())
     }
 
     const isEmitting = this.state === GameState.PLAYING
