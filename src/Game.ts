@@ -146,6 +146,12 @@ export class Game {
       }
     })
 
+    this.scrollManager.onStreakComplete(() => {
+      if (this.state === GameState.PLAYING) {
+        this.motorcycle.triggerWheelie()
+      }
+    })
+
     this.ui.onPlay(() => this.startGame())
     this.ui.onPlayAgain(() => this.restartGame())
 

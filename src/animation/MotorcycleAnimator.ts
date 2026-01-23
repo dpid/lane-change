@@ -23,6 +23,10 @@ export class MotorcycleAnimator implements AnimationController {
   private currentLean: number = 0
   private initialBodyRotation: THREE.Euler | null = null
 
+  private wheelieActive: boolean = false
+  private wheelieTime: number = 0
+  private currentWheelieAngle: number = 0
+
   get currentState(): AnimationState {
     return this._currentState
   }
@@ -53,8 +57,16 @@ export class MotorcycleAnimator implements AnimationController {
     }
   }
 
+  triggerWheelie(): void {
+    if (this.wheelieActive) return
+    this.wheelieActive = true
+    this.wheelieTime = 0
+  }
+
   update(delta: number, context?: MotorcycleAnimationContext): void {
     if (!this.parts || !context) return
+
+    this.updateWheelie(delta)
 
     switch (this._currentState) {
       case AnimationState.DROPPING:
@@ -69,6 +81,35 @@ export class MotorcycleAnimator implements AnimationController {
       case AnimationState.DYING:
         this.updateDying(delta, context)
         break
+    }
+  }
+
+  private updateWheelie(delta: number): void {
+    if (!this.wheelieActive) return
+
+    this.wheelieTime += delta
+
+    const { WHEELIE_DURATION, WHEELIE_ANGLE, WHEELIE_EASE_IN_TIME, WHEELIE_EASE_OUT_TIME } = AnimationConfig
+    const sustainEnd = WHEELIE_DURATION - WHEELIE_EASE_OUT_TIME
+
+    if (this.wheelieTime < WHEELIE_EASE_IN_TIME) {
+      const t = this.wheelieTime / WHEELIE_EASE_IN_TIME
+      const eased = t * t * (3 - 2 * t)
+      this.currentWheelieAngle = WHEELIE_ANGLE * eased
+    } else if (this.wheelieTime < sustainEnd) {
+      this.currentWheelieAngle = WHEELIE_ANGLE
+    } else if (this.wheelieTime < WHEELIE_DURATION) {
+      const t = (this.wheelieTime - sustainEnd) / WHEELIE_EASE_OUT_TIME
+      const eased = t * t * (3 - 2 * t)
+      this.currentWheelieAngle = WHEELIE_ANGLE * (1 - eased)
+    } else {
+      this.wheelieActive = false
+      this.wheelieTime = 0
+      this.currentWheelieAngle = 0
+    }
+
+    if (this.bodyPivot) {
+      this.bodyPivot.rotation.x = -this.currentWheelieAngle
     }
   }
 
@@ -123,6 +164,9 @@ export class MotorcycleAnimator implements AnimationController {
     this._currentState = AnimationState.IDLE
     this.wheelRotation = 0
     this.currentLean = 0
+    this.wheelieActive = false
+    this.wheelieTime = 0
+    this.currentWheelieAngle = 0
 
     if (this.frontWheel) {
       this.frontWheel.rotation.x = 0

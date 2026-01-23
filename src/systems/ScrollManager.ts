@@ -6,9 +6,14 @@ export class ScrollManager {
   private scrolling: boolean = false
   private coinStreak: number = 0
   private completedStreaks: number = 0
+  private onStreakCompleteCallback: (() => void) | null = null
 
   constructor() {
     this.worldContainer = new THREE.Group()
+  }
+
+  onStreakComplete(callback: () => void): void {
+    this.onStreakCompleteCallback = callback
   }
 
   getSpeedMultiplier(): number {
@@ -47,6 +52,9 @@ export class ScrollManager {
         this.completedStreaks++
       }
       this.coinStreak = 0
+      if (this.onStreakCompleteCallback) {
+        this.onStreakCompleteCallback()
+      }
     }
   }
 

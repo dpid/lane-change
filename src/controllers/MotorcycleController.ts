@@ -67,6 +67,10 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this.animator.setState(AnimationState.JUMPING)
   }
 
+  triggerWheelie(): void {
+    this.animator.triggerWheelie()
+  }
+
   getCurrentLane(): 'left' | 'right' {
     return this.currentLane
   }
