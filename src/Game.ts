@@ -138,6 +138,9 @@ export class Game {
     this.scrollManager.onStreakComplete(() => {
       if (this.state === GameState.PLAYING) {
         this.motorcycle.triggerWheelie()
+        if (this.scrollManager.isAtMaxSpeed()) {
+          this.invincibilityEndTime = Date.now() + PhysicsConfig.INVINCIBILITY_DURATION_MS
+        }
       }
     })
 

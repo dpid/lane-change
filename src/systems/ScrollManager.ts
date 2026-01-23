@@ -21,6 +21,10 @@ export class ScrollManager {
     return 1 + progress * (PhysicsConfig.MAX_SPEED_MULTIPLIER - 1)
   }
 
+  isAtMaxSpeed(): boolean {
+    return this.completedStreaks >= PhysicsConfig.STREAKS_TO_MAX_SPEED
+  }
+
   addToWorld(object: THREE.Object3D): void {
     this.worldContainer.add(object)
   }
