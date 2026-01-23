@@ -82,11 +82,11 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
   spawn(): void {
     this._state = CharacterState.IDLE
     this._group.visible = false
-    this._group.position.set(PhysicsConfig.LANE_RIGHT_X, PhysicsConfig.DROP_START_Y, 0)
+    const laneX = this.currentLane === 'left' ? PhysicsConfig.LANE_LEFT_X : PhysicsConfig.LANE_RIGHT_X
+    this._group.position.set(laneX, PhysicsConfig.DROP_START_Y, 0)
     this._group.rotation.set(0, 0, 0)
     this._group.scale.set(1, 1, 1)
     this.jumpVelocity = 0
-    this.currentLane = 'right'
     this.targetLane = null
     this.isLaneSwitching = false
     this.laneProgress = 0
