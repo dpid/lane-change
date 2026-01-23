@@ -103,7 +103,7 @@ export class ItemManager {
     this.activeItems.push(item)
   }
 
-  checkCollisions(motorcycleBox: THREE.Box3, currentLane: 'left' | 'right', motorcycleZ: number): CollisionResult {
+  checkCollisions(motorcycleBox: THREE.Box3, motorcycleZ: number): CollisionResult {
     this.container.updateMatrixWorld(true)
     const containerZ = (this.container as THREE.Group).position.z
 
@@ -118,8 +118,9 @@ export class ItemManager {
       const item = this.activeItems[i]
       const itemWorldZ = item.group.position.z + containerZ
 
-      if (item.lane === currentLane && !item.collected) {
+      if (!item.collected) {
         const itemBox = item.getBoundingBox()
+
         if (motorcycleBox.intersectsBox(itemBox)) {
           if (item.effectType === EffectType.KILL) {
             killed = true

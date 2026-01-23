@@ -219,10 +219,9 @@ export class Game {
 
     if (this.state === GameState.PLAYING) {
       const motorcycleBox = this.motorcycle.getBoundingBox()
-      const currentLane = this.motorcycle.getCurrentLane()
       const motorcycleZ = this.motorcycle.getPosition().z
 
-      const result = this.itemManager.checkCollisions(motorcycleBox, currentLane, motorcycleZ)
+      const result = this.itemManager.checkCollisions(motorcycleBox, motorcycleZ)
 
       if (result.passedItems > 0) {
         const obstaclePoints = result.passedItems * POINTS_PER_OBSTACLE
