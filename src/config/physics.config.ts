@@ -18,7 +18,9 @@ export const PhysicsConfig = {
   CRASH_EXIT_X: 6,
 
   COLLISION_SHRINK: 0.1,
-  COLLECTION_EXPANSION: 0.15
+  COLLECTION_EXPANSION: 0.15,
+
+  INVINCIBILITY_DURATION_MS: 3000
 } as const
 
 export type PhysicsConfigType = typeof PhysicsConfig

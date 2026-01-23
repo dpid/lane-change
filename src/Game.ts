@@ -11,7 +11,7 @@ import { PlayerInputProvider } from './input/PlayerInputProvider'
 import { InputActionType } from './input/InputAction'
 import { AssetLoader } from './loaders'
 import { SmokeSystem, VoxelBurstSystem, CelebrationSystem, WindSystem } from './effects'
-import { EnvironmentColors, FogConfig, CameraConfig } from './config'
+import { EnvironmentColors, FogConfig, CameraConfig, PhysicsConfig } from './config'
 import { PlayFunManager } from './systems/PlayFunManager'
 import { AudioManager } from './audio/AudioManager'
 
@@ -50,6 +50,7 @@ export class Game {
 
   private state: GameState = GameState.MENU
   private score: number = 0
+  private invincibilityEndTime: number = 0
 
   constructor() {
     const canvas = document.getElementById('game') as HTMLCanvasElement
@@ -130,6 +131,7 @@ export class Game {
     this.motorcycle.on('dropComplete', () => {
       if (this.state === GameState.DROPPING) {
         this.state = GameState.PLAYING
+        this.invincibilityEndTime = Date.now() + PhysicsConfig.INVINCIBILITY_DURATION_MS
       }
     })
 
@@ -161,6 +163,10 @@ export class Game {
         this.motorcycle.handleAction(action)
       }
     })
+  }
+
+  private isInvincible(): boolean {
+    return Date.now() < this.invincibilityEndTime
   }
 
   private startGame(): void {
@@ -237,7 +243,7 @@ export class Game {
         this.scrollManager.onCoinMissed()
       }
 
-      if (result.killed && !this.motorcycle.isDead()) {
+      if (result.killed && !this.motorcycle.isDead() && !this.isInvincible()) {
         this.smokeSystem.emitCrashBurst(this.scrollManager.getScrollSpeed())
         this.motorcycle.loseHitpoint(this.scrollManager.getScrollSpeed())
 
