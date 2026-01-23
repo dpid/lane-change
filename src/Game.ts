@@ -12,6 +12,7 @@ import { AssetLoader } from './loaders'
 import { SmokeSystem, VoxelBurstSystem, CelebrationSystem, WindSystem } from './effects'
 import { EnvironmentColors, FogConfig, CameraConfig } from './config'
 import { PlayFunManager } from './systems/PlayFunManager'
+import { AudioManager } from './audio/AudioManager'
 
 export enum GameState {
   MENU,
@@ -43,6 +44,7 @@ export class Game {
   private celebrationSystem!: CelebrationSystem
   private windSystem!: WindSystem
   private playFun!: PlayFunManager
+  private audioManager!: AudioManager
 
   private state: GameState = GameState.MENU
   private score: number = 0
@@ -141,6 +143,8 @@ export class Game {
     this.itemManager = new ItemManager(this.scrollManager.worldContainer, this.scrollManager)
     this.ui = new UI()
     this.ui.setHideScore(this.playFun.isActive())
+    this.audioManager = new AudioManager()
+    this.ui.setMuteIcon(this.audioManager.isMuted())
     this.inputManager = new InputManager()
 
     this.motorcycle.on('dropComplete', () => {
@@ -157,6 +161,11 @@ export class Game {
 
     this.ui.onPlay(() => this.startGame())
     this.ui.onPlayAgain(() => this.restartGame())
+    this.ui.onMuteToggle(() => {
+      const newMuted = !this.audioManager.isMuted()
+      this.audioManager.setMuted(newMuted)
+      this.ui.setMuteIcon(newMuted)
+    })
 
     this.setupInput()
     this.animate()
@@ -181,6 +190,7 @@ export class Game {
     this.state = GameState.DROPPING
     this.scrollManager.startScrolling()
     this.motorcycle.dropIn()
+    this.audioManager.play()
   }
 
   private restartGame(): void {
@@ -264,6 +274,7 @@ export class Game {
         this.scrollManager.stopScrolling()
         this.scrollManager.resetProgression()
         this.itemManager.setSpawnDirection('toward_horizon')
+        this.audioManager.fadeOut()
         this.state = GameState.DYING
       }
     }

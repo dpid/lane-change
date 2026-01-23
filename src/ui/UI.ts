@@ -5,6 +5,9 @@ export class UI {
   private scoreElement: HTMLElement
   private gameOverElement: HTMLElement
   private finalScoreElement: HTMLElement
+  private muteBtn: HTMLElement
+  private soundOnPath: HTMLElement
+  private soundOffPath: HTMLElement
   private currentScreen: Screen = 'menu'
   private playCallback: (() => void) | null = null
   private playAgainCallback: (() => void) | null = null
@@ -15,6 +18,9 @@ export class UI {
     this.scoreElement = document.getElementById('score')!
     this.gameOverElement = document.getElementById('gameOver')!
     this.finalScoreElement = document.getElementById('finalScore')!
+    this.muteBtn = document.getElementById('muteBtn')!
+    this.soundOnPath = document.getElementById('soundOn')!
+    this.soundOffPath = document.getElementById('soundOff')!
 
     window.addEventListener('keydown', this.handleKeydown)
   }
@@ -69,12 +75,21 @@ export class UI {
   onPlay(callback: () => void): void {
     this.playCallback = callback
     this.menuElement.addEventListener('click', callback)
-    this.menuElement.addEventListener('touchstart', this.handleTouch(callback), { passive: false })
+    this.menuElement.addEventListener('touchend', this.handleTouch(callback), { passive: false })
   }
 
   onPlayAgain(callback: () => void): void {
     this.playAgainCallback = callback
     this.gameOverElement.addEventListener('click', callback)
-    this.gameOverElement.addEventListener('touchstart', this.handleTouch(callback), { passive: false })
+    this.gameOverElement.addEventListener('touchend', this.handleTouch(callback), { passive: false })
+  }
+
+  onMuteToggle(callback: () => void): void {
+    this.muteBtn.addEventListener('click', callback)
+  }
+
+  setMuteIcon(muted: boolean): void {
+    this.soundOnPath.style.display = muted ? 'none' : 'block'
+    this.soundOffPath.style.display = muted ? 'block' : 'none'
   }
 }
