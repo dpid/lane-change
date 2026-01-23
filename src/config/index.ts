@@ -13,3 +13,4 @@ export { MotorcycleFactoryConfig, ItemFactoryConfig, SceneryFactoryConfig } from
 export { AudioConfig } from './audio.config'
 export { InputConfig } from './input.config'
 export { PoolConfig } from './pool.config'
+export { PopupConfig } from './popup.config'

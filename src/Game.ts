@@ -10,7 +10,7 @@ import { InputManager } from './input/InputManager'
 import { PlayerInputProvider } from './input/PlayerInputProvider'
 import { InputActionType } from './input/InputAction'
 import { AssetLoader } from './loaders'
-import { SmokeSystem, VoxelBurstSystem, CelebrationSystem, WindSystem } from './effects'
+import { SmokeSystem, VoxelBurstSystem, CelebrationSystem, WindSystem, ScorePopupSystem } from './effects'
 import { EnvironmentColors, FogConfig, CameraConfig, PhysicsConfig } from './config'
 import { PlayFunManager } from './systems/PlayFunManager'
 import { AudioManager } from './audio/AudioManager'
@@ -43,6 +43,7 @@ export class Game {
   private voxelBurstSystem!: VoxelBurstSystem
   private celebrationSystem!: CelebrationSystem
   private windSystem!: WindSystem
+  private scorePopupSystem!: ScorePopupSystem
   private playFun!: PlayFunManager
   private audioManager!: AudioManager
   private cameraController!: CameraController
@@ -117,6 +118,7 @@ export class Game {
     this.smokeSystem.setMotorcycle(this.motorcycle.group)
     this.voxelBurstSystem = new VoxelBurstSystem(this.scene)
     this.celebrationSystem = new CelebrationSystem(this.scene)
+    this.scorePopupSystem = new ScorePopupSystem(this.scene)
     this.windSystem = new WindSystem(this.scene)
     this.windSystem.setMotorcycle(this.motorcycle.group)
     this.itemManager = new ItemManager(this.scrollManager.worldContainer, this.scrollManager)
@@ -191,6 +193,7 @@ export class Game {
     this.smokeSystem.reset()
     this.voxelBurstSystem.reset()
     this.celebrationSystem.reset()
+    this.scorePopupSystem.reset()
     this.windSystem.reset()
     this.cameraController.reset()
     this.startGame()
@@ -226,12 +229,15 @@ export class Game {
         this.score += obstaclePoints
         this.ui.updateScore(this.score)
         this.playFun.addPoints(obstaclePoints)
+        this.scorePopupSystem.show(this.motorcycle.getPosition(), obstaclePoints, false)
       }
 
       if (result.scoreItems > 0) {
         let coinPoints = 0
         for (let i = 0; i < result.scoreItems; i++) {
-          coinPoints += this.scrollManager.onCoinCollected()
+          const singleCoinPoints = this.scrollManager.onCoinCollected()
+          coinPoints += singleCoinPoints
+          this.scorePopupSystem.show(this.motorcycle.getPosition(), singleCoinPoints, true)
         }
         this.score += coinPoints
         this.ui.updateScore(this.score)
@@ -285,6 +291,7 @@ export class Game {
     const isEmitting = this.state === GameState.PLAYING
     this.smokeSystem.update(delta, isEmitting, this.scrollManager.getScrollSpeed())
     this.celebrationSystem.update(delta)
+    this.scorePopupSystem.update(delta)
 
     if (this.state === GameState.PLAYING && this.motorcycle.isWheelieActive()) {
       this.windSystem.startEffect()
