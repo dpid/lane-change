@@ -53,7 +53,7 @@ export const ItemDefinitions: Record<GeometryType, ItemDefinition> = {
     effectType: EffectType.SCORE,
     cardCount: 30,
     yOffset: RIDER_HEIGHT,
-    collisionModifier: 0.15,
+    collisionModifier: 0.5,
     rotates: true
   },
   [GeometryType.NONE]: {
