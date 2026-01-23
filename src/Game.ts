@@ -10,7 +10,7 @@ import { PlayerInputProvider } from './input/PlayerInputProvider'
 import { InputActionType } from './input/InputAction'
 import { AssetLoader } from './loaders'
 import { SmokeSystem, VoxelBurstSystem } from './effects'
-import { EnvironmentColors, FogConfig } from './config'
+import { EnvironmentColors, FogConfig, CameraConfig } from './config'
 import { PlayFunManager } from './systems/PlayFunManager'
 
 export enum GameState {
@@ -63,9 +63,10 @@ export class Game {
     this.scene.fog = new THREE.Fog(EnvironmentColors.fog, FogConfig.near, FogConfig.far)
 
     const aspect = window.innerWidth / window.innerHeight
-    this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 2000)
-    this.camera.position.set(0, 3, 8)
-    this.camera.lookAt(0, 1, 0)
+    this.camera = new THREE.PerspectiveCamera(CameraConfig.FOV, aspect, CameraConfig.NEAR, CameraConfig.FAR)
+    this.camera.position.set(0, CameraConfig.BASE_Y, CameraConfig.BASE_Z)
+    this.updateCameraForAspect(aspect)
+    this.camera.lookAt(0, CameraConfig.LOOK_AT_Y, 0)
 
     this.clock = new THREE.Clock()
 
@@ -88,8 +89,20 @@ export class Game {
       const aspect = window.innerWidth / window.innerHeight
       this.camera.aspect = aspect
       this.camera.updateProjectionMatrix()
+      this.updateCameraForAspect(aspect)
       this.renderer.setSize(window.innerWidth, window.innerHeight)
     })
+  }
+
+  private updateCameraForAspect(aspect: number): void {
+    const fovRadians = (CameraConfig.FOV * Math.PI) / 180
+    const halfFovTan = Math.tan(fovRadians / 2)
+    const horizontalHalfFovTan = halfFovTan * aspect
+
+    const requiredZ = CameraConfig.MIN_VISIBLE_HALF_WIDTH / horizontalHalfFovTan
+    const cameraZ = Math.max(requiredZ, CameraConfig.BASE_Z)
+
+    this.camera.position.z = cameraZ
   }
 
   async init(): Promise<void> {
