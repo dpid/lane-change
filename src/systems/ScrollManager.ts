@@ -53,11 +53,11 @@ export class ScrollManager {
     this.coinStreak++
     const points = this.coinStreak * PhysicsConfig.BASE_COIN_POINTS
 
-    if (this.coinStreak % PhysicsConfig.COINS_PER_BOOST === 0) {
-      this.completedBoosts = Math.min(
-        Math.floor(this.coinStreak / PhysicsConfig.COINS_PER_BOOST),
-        PhysicsConfig.STREAKS_TO_MAX_SPEED
-      )
+    const completedStreak = this.coinStreak % PhysicsConfig.COINS_PER_BOOST === 0
+    if (completedStreak) {
+      if (this.completedBoosts < PhysicsConfig.STREAKS_TO_MAX_SPEED) {
+        this.completedBoosts++
+      }
       this.onStreakCompleteCallback?.()
     }
 
