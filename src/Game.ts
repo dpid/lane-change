@@ -45,6 +45,7 @@ export class Game {
 
   private state: GameState = GameState.MENU
   private score: number = 0
+  private cameraVelocityX: number = 0
 
   constructor() {
     const canvas = document.getElementById('game') as HTMLCanvasElement
@@ -104,6 +105,18 @@ export class Game {
     const cameraZ = Math.max(requiredZ, CameraConfig.BASE_Z)
 
     this.camera.position.z = cameraZ
+  }
+
+  private updateCamera(delta: number): void {
+    const targetX = this.motorcycle.group.position.x
+    const displacement = targetX - this.camera.position.x
+
+    const springForce = CameraConfig.SPRING_STIFFNESS * displacement
+    const dampingForce = CameraConfig.SPRING_DAMPING * this.cameraVelocityX
+
+    this.cameraVelocityX += (springForce - dampingForce) * delta
+    this.camera.position.x += this.cameraVelocityX * delta
+    this.camera.lookAt(this.camera.position.x, CameraConfig.LOOK_AT_Y, 0)
   }
 
   async init(): Promise<void> {
@@ -169,6 +182,9 @@ export class Game {
     this.smokeSystem.reset()
     this.voxelBurstSystem.reset()
     this.celebrationSystem.reset()
+    this.camera.position.x = 0
+    this.camera.lookAt(0, CameraConfig.LOOK_AT_Y, 0)
+    this.cameraVelocityX = 0
     this.startGame()
   }
 
@@ -239,6 +255,7 @@ export class Game {
 
     if (this.state === GameState.DROPPING || this.state === GameState.PLAYING || this.state === GameState.DYING) {
       this.motorcycle.update(delta, this.scrollManager.getSpeedMultiplier())
+      this.updateCamera(delta)
     }
 
     const isEmitting = this.state === GameState.PLAYING
