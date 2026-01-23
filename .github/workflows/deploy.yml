@@ -34,6 +34,7 @@ jobs:
         run: npm run build
         env:
           VITE_PLAYFUN_GAME_ID: ${{ secrets.VITE_PLAYFUN_GAME_ID }}
+          VITE_PLAYFUN_API_KEY: ${{ secrets.VITE_PLAYFUN_API_KEY }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
