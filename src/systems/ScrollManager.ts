@@ -4,16 +4,16 @@ import { PhysicsConfig } from '../config'
 export class ScrollManager {
   readonly worldContainer: THREE.Group
   private scrolling: boolean = false
-  private elapsedTime: number = 0
+  private coinStreak: number = 0
+  private completedStreaks: number = 0
 
   constructor() {
     this.worldContainer = new THREE.Group()
   }
 
   getSpeedMultiplier(): number {
-    const t = this.elapsedTime / PhysicsConfig.SPEED_RAMP_DURATION
-    const curve = 1 - Math.pow(Math.max(0, 1 - t), 2)
-    return 1 + curve * (PhysicsConfig.MAX_SPEED_MULTIPLIER - 1)
+    const progress = this.completedStreaks / PhysicsConfig.STREAKS_TO_MAX_SPEED
+    return 1 + progress * (PhysicsConfig.MAX_SPEED_MULTIPLIER - 1)
   }
 
   addToWorld(object: THREE.Object3D): void {
@@ -40,12 +40,23 @@ export class ScrollManager {
     return 1 / this.getSpeedMultiplier()
   }
 
-  updateProgression(delta: number): void {
-    this.elapsedTime += delta
+  onCoinCollected(): void {
+    this.coinStreak++
+    if (this.coinStreak >= PhysicsConfig.COINS_PER_STREAK) {
+      if (this.completedStreaks < PhysicsConfig.STREAKS_TO_MAX_SPEED) {
+        this.completedStreaks++
+      }
+      this.coinStreak = 0
+    }
+  }
+
+  onCoinMissed(): void {
+    this.coinStreak = 0
   }
 
   resetProgression(): void {
-    this.elapsedTime = 0
+    this.coinStreak = 0
+    this.completedStreaks = 0
   }
 
   update(delta: number): void {
@@ -57,6 +68,7 @@ export class ScrollManager {
   reset(): void {
     this.worldContainer.position.set(0, 0, 0)
     this.scrolling = false
-    this.elapsedTime = 0
+    this.coinStreak = 0
+    this.completedStreaks = 0
   }
 }

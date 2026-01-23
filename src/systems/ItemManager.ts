@@ -121,6 +121,7 @@ export interface CollisionResult {
   scoreItems: number
   passedItems: number
   collectedPositions: THREE.Vector3[]
+  missedCoins: number
 }
 
 export class ItemManager {
@@ -221,6 +222,7 @@ export class ItemManager {
     let killed = false
     let scoreItems = 0
     let passedItems = 0
+    let missedCoins = 0
     const collectedPositions: THREE.Vector3[] = []
     const PASSED_THRESHOLD = 0.5
 
@@ -252,9 +254,15 @@ export class ItemManager {
         item.passed = true
         passedItems++
       }
+
+      if (!item.passed && item.effectType === EffectType.SCORE && !item.collected &&
+          itemWorldZ > motorcycleZ + PASSED_THRESHOLD) {
+        item.passed = true
+        missedCoins++
+      }
     }
 
-    return { killed, scoreItems, passedItems, collectedPositions }
+    return { killed, scoreItems, passedItems, collectedPositions, missedCoins }
   }
 
   setSpawnDirection(direction: 'toward_camera' | 'toward_horizon'): void {

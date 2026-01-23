@@ -207,8 +207,6 @@ export class Game {
     }
 
     if (this.state === GameState.PLAYING) {
-      this.scrollManager.updateProgression(delta)
-
       const motorcycleBox = this.motorcycle.getBoundingBox()
       const currentLane = this.motorcycle.getCurrentLane()
       const motorcycleZ = this.motorcycle.getPosition().z
@@ -223,6 +221,9 @@ export class Game {
       }
 
       if (result.scoreItems > 0) {
+        for (let i = 0; i < result.scoreItems; i++) {
+          this.scrollManager.onCoinCollected()
+        }
         const coinPoints = result.scoreItems * POINTS_PER_COIN
         this.score += coinPoints
         this.ui.updateScore(this.score)
@@ -230,6 +231,10 @@ export class Game {
         for (const pos of result.collectedPositions) {
           this.celebrationSystem.emitBurst(pos)
         }
+      }
+
+      if (result.missedCoins > 0) {
+        this.scrollManager.onCoinMissed()
       }
 
       if (result.killed && !this.motorcycle.isDead()) {
