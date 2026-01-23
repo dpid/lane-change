@@ -96,10 +96,7 @@ export class Game {
     await AssetLoader.getInstance().loadAll()
 
     this.playFun = new PlayFunManager()
-    const gameId = import.meta.env.VITE_PLAYFUN_GAME_ID
-    if (gameId) {
-      await this.playFun.init(gameId)
-    }
+    this.playFun.init()
 
     this.scrollManager = new ScrollManager()
     this.scene.add(this.scrollManager.worldContainer)
@@ -209,7 +206,7 @@ export class Game {
           if (this.state !== GameState.GAME_OVER) {
             this.state = GameState.GAME_OVER
             this.ui.showGameOver(this.score)
-            this.playFun.savePoints()
+            this.playFun.savePoints(this.score)
           }
         })
 

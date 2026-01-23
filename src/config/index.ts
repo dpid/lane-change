@@ -5,3 +5,4 @@ export { MotorcycleColors, ObstacleColors, PowerupColors, EnvironmentColors, Fog
 export * from './items.config'
 export { ParticlesConfig } from './particles.config'
 export { VoxelBurstConfig } from './voxel-burst.config'
+export { OGPConfig } from './ogp.config'
