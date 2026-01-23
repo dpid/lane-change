@@ -175,9 +175,10 @@ export class Game {
   }
 
   private restartGame(): void {
+    const containerZ = this.scrollManager.worldContainer.position.z
+    this.itemManager.compensateForContainerReset(containerZ)
     this.scrollManager.reset()
     this.ground.reset()
-    this.itemManager.reset()
     this.motorcycle.reset()
     this.smokeSystem.reset()
     this.voxelBurstSystem.reset()

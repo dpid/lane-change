@@ -157,6 +157,13 @@ export class ItemManager {
     this.spawnDirection = direction
   }
 
+  compensateForContainerReset(containerZOffset: number): void {
+    for (const item of this.activeItems) {
+      item.group.position.z += containerZOffset
+    }
+    this.spawnDirection = 'toward_camera'
+  }
+
   reset(): void {
     for (const item of this.activeItems) {
       const pool = this.pools.get(item.geometryType)
