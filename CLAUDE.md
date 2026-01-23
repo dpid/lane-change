@@ -30,14 +30,15 @@ scene
 
 ### Speed Progression
 
-ScrollManager owns speed progression state. Speed increases over time using a quadratic ease-out curve:
+ScrollManager owns speed progression state. Speed increases with coin streaks:
 
-- `BASE_SCROLL_SPEED`: 20 units/sec (starting speed)
-- `MAX_SPEED_MULTIPLIER`: 5 (caps at 100 units/sec)
-- `SPEED_RAMP_DURATION`: 120 seconds to reach ~100% of max
+- `BASE_SCROLL_SPEED`: 40 units/sec (starting speed)
+- `MAX_SPEED_MULTIPLIER`: 5 (caps at 200 units/sec)
+- `COINS_PER_STREAK`: 3 coins to complete a streak
+- `STREAKS_TO_MAX_SPEED`: 10 streaks to reach max speed
 
 **Key behaviors:**
-- Progression only advances during PLAYING state (not DROPPING)
+- Each completed streak increases the speed multiplier
 - Spawn intervals decrease proportionally (`1 / multiplier`) to maintain visual density
 - Lane switch speed and lean angle scale with speed multiplier (base values are 1/5 of max)
 - On death: progression resets so game over items move at base speed
@@ -113,6 +114,14 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 - Short lifetime (0.25s) with opacity fade in final 30%
 - Config in `src/config/wind.config.ts`
 
+### Audio System
+
+`AudioManager` handles background music with mute toggle:
+- Loops `soundtrack.mp3` during gameplay
+- Starts on play/restart, fades out on death
+- Mute toggle (M key) with preference saved to localStorage
+- Uses touchend event for mobile audio compatibility
+
 ## Key Files
 
 - `src/Game.ts` - Main game loop and state management (async init)
@@ -125,6 +134,7 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 - `src/effects/CelebrationSystem.ts` - Coin collection particle bursts (pooled)
 - `src/effects/WindSystem.ts` - Speed line effect during wheelies (pooled)
 - `src/animation/MotorcycleAnimator.ts` - Motorcycle animations (wheels, lean, wheelie)
+- `src/audio/AudioManager.ts` - Background music with mute toggle
 - `src/config/` - All magic numbers extracted to config files
 - `public/models/` - MagicaVoxel .vox assets
 

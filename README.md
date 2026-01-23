@@ -4,12 +4,13 @@ A motorcycle endless runner game built with Three.js and TypeScript.
 
 ## Gameplay
 
-Switch lanes to avoid obstacles and collect coins. Collect 3 coins in a row to complete a streak, increase your speed, and trigger a wheelie. The game starts at a comfortable pace but speeds up over time, reaching maximum intensity after about two minutes. How far can you go?
+Switch lanes to avoid obstacles and collect coins. Collect 3 coins in a row to complete a streak, increase your speed, and trigger a wheelie. Complete 10 streaks to reach maximum speed. How far can you go?
 
 **Controls:**
 - **Space/Enter** - Switch lanes
 - **Mouse click** - Switch lanes
 - **Touch** - Switch lanes (mobile)
+- **M** - Toggle music mute
 
 **Scoring:**
 - Pass an obstacle: 1 point
@@ -58,6 +59,8 @@ public/
 src/
 ├── main.ts          # Entry point
 ├── Game.ts          # Main game loop and state management
+├── animation/       # Visual animations
+├── audio/           # Background music and sound effects
 ├── config/          # Game constants (physics, spawn, animation)
 ├── controllers/     # Motorcycle control
 ├── factories/       # Entity creation (obstacles, powerups, scenery)
@@ -71,7 +74,6 @@ src/
 │   ├── SmokeSystem.ts      # Exhaust smoke particles (pooled)
 │   ├── CelebrationSystem.ts # Coin collection bursts (pooled)
 │   └── WindSystem.ts       # Speed lines during wheelies (pooled)
-├── animation/       # Visual animations
 ├── input/           # Input handling (keyboard, mouse, touch)
 ├── pooling/         # Object pooling for performance
 └── ui/              # User interface
