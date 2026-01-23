@@ -86,6 +86,7 @@ export class UI {
 
   onMuteToggle(callback: () => void): void {
     this.muteBtn.addEventListener('click', callback)
+    this.muteBtn.addEventListener('touchend', this.handleTouch(callback), { passive: false })
   }
 
   setMuteIcon(muted: boolean): void {
