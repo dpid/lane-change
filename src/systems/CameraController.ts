@@ -37,7 +37,7 @@ export class CameraController {
     this.camera.lookAt(this.camera.position.x, CameraConfig.LOOK_AT_Y, 0)
 
     if (wheelieActive && !this.wasWheelieActive) {
-      this.zoomDelayTimer = 0
+      this.zoomDelayTimer = CameraConfig.ZOOM_IN_DELAY
     }
 
     if (!wheelieActive && this.wasWheelieActive) {
@@ -47,7 +47,11 @@ export class CameraController {
     this.wasWheelieActive = wheelieActive
 
     if (wheelieActive) {
-      this.zoomProgress = Math.min(1, this.zoomProgress + delta / CameraConfig.ZOOM_IN_DURATION)
+      if (this.zoomDelayTimer > 0) {
+        this.zoomDelayTimer -= delta
+      } else {
+        this.zoomProgress = Math.min(1, this.zoomProgress + delta / CameraConfig.ZOOM_IN_DURATION)
+      }
     } else if (this.zoomDelayTimer > 0) {
       this.zoomDelayTimer -= delta
     } else if (this.zoomProgress > 0) {
