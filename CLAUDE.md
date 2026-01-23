@@ -86,15 +86,25 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 - Hemispherical crash burst on death, intensity scales with scroll speed
 - Config in `src/config/particles.config.ts`
 
+### Wheelie Animation
+
+`MotorcycleAnimator` handles a wheelie animation triggered on coin streak completion:
+- Overlay animation that runs independently of AnimationState (RUNNING, JUMPING, etc.)
+- Uses X-axis rotation (pitch), separate from Z-axis lean (roll) during lane switches
+- ScrollManager notifies via `onStreakComplete` callback when `COINS_PER_STREAK` coins collected
+- Animation phases: quick ease-in (0.1s), sustain at max angle, ease-out (0.4s)
+- Config in `src/config/animation.config.ts`
+
 ## Key Files
 
 - `src/Game.ts` - Main game loop and state management (async init)
 - `src/loaders/AssetLoader.ts` - VOX model loading and caching
-- `src/systems/ScrollManager.ts` - World container and scroll control
+- `src/systems/ScrollManager.ts` - World container, scroll control, streak tracking
 - `src/systems/ItemManager.ts` - Item spawning, pooling, collision (deck-based)
 - `src/systems/Ground.ts` - Road, grass, lane dashes, edge lines (pooled)
 - `src/systems/Background.ts` - Sky and roadside signs (pooled)
 - `src/effects/SmokeSystem.ts` - Exhaust smoke particles (pooled)
+- `src/animation/MotorcycleAnimator.ts` - Motorcycle animations (wheels, lean, wheelie)
 - `src/config/` - All magic numbers extracted to config files
 - `public/models/` - MagicaVoxel .vox assets
 
