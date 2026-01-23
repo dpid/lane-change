@@ -141,6 +141,7 @@ export class Game {
     this.windSystem = new WindSystem(this.scene)
     this.windSystem.setMotorcycle(this.motorcycle.group)
     this.itemManager = new ItemManager(this.scrollManager.worldContainer, this.scrollManager)
+    this.itemManager.setSpawnDirection('toward_horizon')
     this.ui = new UI()
     this.ui.setHideScore(this.playFun.isActive())
     this.audioManager = new AudioManager()
@@ -187,6 +188,7 @@ export class Game {
     this.score = 0
     this.ui.updateScore(0)
     this.ui.showGame()
+    this.itemManager.setSpawnDirection('toward_camera')
     this.state = GameState.DROPPING
     this.scrollManager.startScrolling()
     this.motorcycle.dropIn()
@@ -222,7 +224,7 @@ export class Game {
       this.ground.update(delta)
     }
 
-    if (this.state === GameState.PLAYING || this.state === GameState.DYING || this.state === GameState.GAME_OVER) {
+    if (this.state === GameState.MENU || this.state === GameState.PLAYING || this.state === GameState.DYING || this.state === GameState.GAME_OVER) {
       this.itemManager.update(delta)
     }
 
