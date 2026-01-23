@@ -95,6 +95,16 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 - Animation phases: quick ease-in (0.1s), sustain at max angle, ease-out (0.4s)
 - Config in `src/config/animation.config.ts`
 
+### Wind Effect
+
+`WindSystem` provides Mario Kart-style speed lines during wheelies:
+- Elongated white box meshes streaming from front to back
+- Activates when `motorcycle.isWheelieActive()` returns true
+- Particles spawn ahead of motorcycle with random X/Y spread
+- Move straight toward camera at high velocity (80 units/sec)
+- Short lifetime (0.25s) with opacity fade in final 30%
+- Config in `src/config/wind.config.ts`
+
 ## Key Files
 
 - `src/Game.ts` - Main game loop and state management (async init)
@@ -104,6 +114,7 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 - `src/systems/Ground.ts` - Road, grass, lane dashes, edge lines (pooled)
 - `src/systems/Background.ts` - Sky and roadside signs (pooled)
 - `src/effects/SmokeSystem.ts` - Exhaust smoke particles (pooled)
+- `src/effects/WindSystem.ts` - Speed line effect during wheelies (pooled)
 - `src/animation/MotorcycleAnimator.ts` - Motorcycle animations (wheels, lean, wheelie)
 - `src/config/` - All magic numbers extracted to config files
 - `public/models/` - MagicaVoxel .vox assets

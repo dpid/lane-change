@@ -71,6 +71,10 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this.animator.triggerWheelie()
   }
 
+  isWheelieActive(): boolean {
+    return this.animator.isWheelieActive
+  }
+
   getCurrentLane(): 'left' | 'right' {
     return this.currentLane
   }

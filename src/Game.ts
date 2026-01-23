@@ -9,7 +9,7 @@ import { InputManager } from './input/InputManager'
 import { PlayerInputProvider } from './input/PlayerInputProvider'
 import { InputActionType } from './input/InputAction'
 import { AssetLoader } from './loaders'
-import { SmokeSystem, VoxelBurstSystem, CelebrationSystem } from './effects'
+import { SmokeSystem, VoxelBurstSystem, CelebrationSystem, WindSystem } from './effects'
 import { EnvironmentColors, FogConfig, CameraConfig } from './config'
 import { PlayFunManager } from './systems/PlayFunManager'
 
@@ -41,6 +41,7 @@ export class Game {
   private smokeSystem!: SmokeSystem
   private voxelBurstSystem!: VoxelBurstSystem
   private celebrationSystem!: CelebrationSystem
+  private windSystem!: WindSystem
   private playFun!: PlayFunManager
 
   private state: GameState = GameState.MENU
@@ -135,6 +136,8 @@ export class Game {
     this.smokeSystem.setMotorcycle(this.motorcycle.group)
     this.voxelBurstSystem = new VoxelBurstSystem(this.scene)
     this.celebrationSystem = new CelebrationSystem(this.scene)
+    this.windSystem = new WindSystem(this.scene)
+    this.windSystem.setMotorcycle(this.motorcycle.group)
     this.itemManager = new ItemManager(this.scrollManager.worldContainer, this.scrollManager)
     this.ui = new UI()
     this.ui.setHideScore(this.playFun.isActive())
@@ -188,6 +191,7 @@ export class Game {
     this.smokeSystem.reset()
     this.voxelBurstSystem.reset()
     this.celebrationSystem.reset()
+    this.windSystem.reset()
     this.camera.position.x = 0
     this.camera.lookAt(0, CameraConfig.LOOK_AT_Y, 0)
     this.cameraVelocityX = 0
@@ -272,6 +276,13 @@ export class Game {
     const isEmitting = this.state === GameState.PLAYING
     this.smokeSystem.update(delta, isEmitting, this.scrollManager.getScrollSpeed())
     this.celebrationSystem.update(delta)
+
+    if (this.motorcycle.isWheelieActive()) {
+      this.windSystem.startEffect()
+    } else {
+      this.windSystem.stopEffect()
+    }
+    this.windSystem.update(delta)
 
     if (this.state === GameState.DYING || this.state === GameState.GAME_OVER) {
       this.voxelBurstSystem.update(delta)

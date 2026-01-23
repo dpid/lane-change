@@ -68,7 +68,8 @@ src/
 │   ├── Background.ts       # Sky and roadside signs (pooled)
 │   └── Ground.ts           # Road, grass, lane markings (pooled)
 ├── effects/         # Visual effects
-│   └── SmokeSystem.ts      # Exhaust smoke particles (pooled)
+│   ├── SmokeSystem.ts      # Exhaust smoke particles (pooled)
+│   └── WindSystem.ts       # Speed lines during wheelies (pooled)
 ├── animation/       # Visual animations
 ├── input/           # Input handling (keyboard, mouse, touch)
 ├── pooling/         # Object pooling for performance

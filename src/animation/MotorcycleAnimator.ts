@@ -31,6 +31,10 @@ export class MotorcycleAnimator implements AnimationController {
     return this._currentState
   }
 
+  get isWheelieActive(): boolean {
+    return this.wheelieActive
+  }
+
   attach(geometry: GeometryParts): void {
     this.parts = geometry
 
