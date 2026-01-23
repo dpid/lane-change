@@ -120,6 +120,7 @@ export interface CollisionResult {
   killed: boolean
   scoreItems: number
   passedItems: number
+  collectedPositions: THREE.Vector3[]
 }
 
 export class ItemManager {
@@ -220,6 +221,7 @@ export class ItemManager {
     let killed = false
     let scoreItems = 0
     let passedItems = 0
+    const collectedPositions: THREE.Vector3[] = []
     const PASSED_THRESHOLD = 0.5
 
     for (let i = this.activeItems.length - 1; i >= 0; i--) {
@@ -234,6 +236,9 @@ export class ItemManager {
           } else if (item.effectType === EffectType.SCORE) {
             item.collected = true
             scoreItems++
+            const worldPos = new THREE.Vector3()
+            item.group.getWorldPosition(worldPos)
+            collectedPositions.push(worldPos)
             const pool = this.pools.get(item.geometryType)
             if (pool) {
               pool.release(item)
@@ -249,7 +254,7 @@ export class ItemManager {
       }
     }
 
-    return { killed, scoreItems, passedItems }
+    return { killed, scoreItems, passedItems, collectedPositions }
   }
 
   setSpawnDirection(direction: 'toward_camera' | 'toward_horizon'): void {

@@ -1,0 +1,16 @@
+export const CelebrationConfig = {
+  POOL_SIZE: 50,
+  PARTICLE_SIZE: 0.08,
+  PARTICLES_PER_BURST: 12,
+
+  COLORS: [0xFFD700, 0xFFFFFF, 0xFFF8DC],
+
+  BURST_BASE_SPEED: 8,
+  BURST_SPEED_VARIANCE: 4,
+  BURST_UPWARD_BIAS: 5,
+
+  GRAVITY: 12,
+
+  LIFETIME: 0.6,
+  FADE_START: 0.4
+} as const
