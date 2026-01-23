@@ -114,6 +114,17 @@ Input providers emit actions through InputManager. Currently supports keyboard, 
 - Short lifetime (0.25s) with opacity fade in final 30%
 - Config in `src/config/wind.config.ts`
 
+### Camera Zoom
+
+`Game.ts` handles a camera zoom effect during wheelies:
+- Camera moves closer (Z decreases by 2 units) when wheelie starts
+- Quick zoom in (0.15s) with smoothstep easing
+- Stays zoomed while wheelie is active
+- Delayed zoom out (0.25s delay) after wheelie ends
+- Smooth zoom out (0.4s) back to base position
+- Respects aspect ratio adjustments via `cameraBaseZ`
+- Config in `src/config/camera.config.ts`
+
 ### Audio System
 
 `AudioManager` handles background music with mute toggle:

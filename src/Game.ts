@@ -49,6 +49,10 @@ export class Game {
   private state: GameState = GameState.MENU
   private score: number = 0
   private cameraVelocityX: number = 0
+  private cameraBaseZ: number = CameraConfig.BASE_Z
+  private cameraZoomProgress: number = 0
+  private cameraZoomDelayTimer: number = 0
+  private wasWheelieActive: boolean = false
 
   constructor() {
     const canvas = document.getElementById('game') as HTMLCanvasElement
@@ -105,9 +109,11 @@ export class Game {
     const horizontalHalfFovTan = halfFovTan * aspect
 
     const requiredZ = CameraConfig.MIN_VISIBLE_HALF_WIDTH / horizontalHalfFovTan
-    const cameraZ = Math.max(requiredZ, CameraConfig.BASE_Z)
+    this.cameraBaseZ = Math.max(requiredZ, CameraConfig.BASE_Z)
 
-    this.camera.position.z = cameraZ
+    const p = this.cameraZoomProgress
+    const easedZoom = p * p * (3 - 2 * p)
+    this.camera.position.z = this.cameraBaseZ - CameraConfig.ZOOM_IN_AMOUNT * easedZoom
   }
 
   private updateCamera(delta: number): void {
@@ -120,6 +126,30 @@ export class Game {
     this.cameraVelocityX += (springForce - dampingForce) * delta
     this.camera.position.x += this.cameraVelocityX * delta
     this.camera.lookAt(this.camera.position.x, CameraConfig.LOOK_AT_Y, 0)
+
+    const wheelieActive = this.motorcycle.isWheelieActive()
+
+    if (wheelieActive && !this.wasWheelieActive) {
+      this.cameraZoomDelayTimer = 0
+    }
+
+    if (!wheelieActive && this.wasWheelieActive) {
+      this.cameraZoomDelayTimer = CameraConfig.ZOOM_OUT_DELAY
+    }
+
+    this.wasWheelieActive = wheelieActive
+
+    if (wheelieActive) {
+      this.cameraZoomProgress = Math.min(1, this.cameraZoomProgress + delta / CameraConfig.ZOOM_IN_DURATION)
+    } else if (this.cameraZoomDelayTimer > 0) {
+      this.cameraZoomDelayTimer -= delta
+    } else if (this.cameraZoomProgress > 0) {
+      this.cameraZoomProgress = Math.max(0, this.cameraZoomProgress - delta / CameraConfig.ZOOM_OUT_DURATION)
+    }
+
+    const p = this.cameraZoomProgress
+    const easedZoom = p * p * (3 - 2 * p)
+    this.camera.position.z = this.cameraBaseZ - CameraConfig.ZOOM_IN_AMOUNT * easedZoom
   }
 
   async init(): Promise<void> {
@@ -207,6 +237,10 @@ export class Game {
     this.camera.position.x = 0
     this.camera.lookAt(0, CameraConfig.LOOK_AT_Y, 0)
     this.cameraVelocityX = 0
+    this.cameraZoomProgress = 0
+    this.cameraZoomDelayTimer = 0
+    this.wasWheelieActive = false
+    this.camera.position.z = this.cameraBaseZ
     this.startGame()
   }
 
