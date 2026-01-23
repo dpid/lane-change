@@ -109,6 +109,7 @@ export class Game {
     this.voxelBurstSystem = new VoxelBurstSystem(this.scene)
     this.itemManager = new ItemManager(this.scrollManager.worldContainer, this.scrollManager)
     this.ui = new UI()
+    this.ui.setHideScore(this.playFun.isActive())
     this.inputManager = new InputManager()
 
     this.motorcycle.on('dropComplete', () => {

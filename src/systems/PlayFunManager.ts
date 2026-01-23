@@ -74,4 +74,8 @@ export class PlayFunManager {
     if (!this.sdk || !this.ready || score <= 0) return
     this.sdk.savePoints(score)
   }
+
+  isActive(): boolean {
+    return this.sdk !== null
+  }
 }

@@ -8,6 +8,7 @@ export class UI {
   private currentScreen: Screen = 'menu'
   private playCallback: (() => void) | null = null
   private playAgainCallback: (() => void) | null = null
+  private hideScore = false
 
   constructor() {
     this.menuElement = document.getElementById('menu')!
@@ -35,6 +36,10 @@ export class UI {
     callback()
   }
 
+  setHideScore(hide: boolean): void {
+    this.hideScore = hide
+  }
+
   showMenu(): void {
     this.currentScreen = 'menu'
     this.menuElement.style.display = 'block'
@@ -45,7 +50,7 @@ export class UI {
   showGame(): void {
     this.currentScreen = 'game'
     this.menuElement.style.display = 'none'
-    this.scoreElement.style.display = 'block'
+    this.scoreElement.style.display = this.hideScore ? 'none' : 'block'
     this.gameOverElement.style.display = 'none'
   }
 
