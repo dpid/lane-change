@@ -221,7 +221,8 @@ export class MotorcycleController extends CharacterEventEmitter implements Chara
     this._group.position.x = THREE.MathUtils.lerp(startX, endX, easedProgress)
 
     const leanDirection = this.targetLane === 'left' ? 1 : -1
-    const leanAmount = Math.sin(easedProgress * Math.PI)
+    const leanProgress = Math.min(easedProgress * PhysicsConfig.LANE_LEAN_SPEED_FACTOR, 1)
+    const leanAmount = Math.sin(leanProgress * Math.PI)
     this._group.rotation.z = leanDirection * leanAmount * PhysicsConfig.LANE_LEAN_ANGLE * speedMultiplier
 
     const context: MotorcycleAnimationContext = {

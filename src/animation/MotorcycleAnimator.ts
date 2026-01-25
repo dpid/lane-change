@@ -21,7 +21,6 @@ export class MotorcycleAnimator implements AnimationController {
   private bodyPivot: THREE.Group | null = null
 
   private wheelRotation: number = 0
-  private currentLean: number = 0
   private initialBodyRotation: THREE.Euler | null = null
 
   private wheelieActive: boolean = false
@@ -117,10 +116,7 @@ export class MotorcycleAnimator implements AnimationController {
   }
 
   private updateDropping(_delta: number, _context: MotorcycleAnimationContext): void {
-    this.currentLean = 0
-    if (this.bodyPivot) {
-      this.bodyPivot.rotation.z = 0
-    }
+    // No-op - controller handles position/rotation
   }
 
   private updateRunning(delta: number, _context: MotorcycleAnimationContext): void {
@@ -132,14 +128,9 @@ export class MotorcycleAnimator implements AnimationController {
     if (this.rearWheel) {
       this.rearWheel.rotation.x = -this.wheelRotation
     }
-
-    this.currentLean = 0
-    if (this.bodyPivot) {
-      this.bodyPivot.rotation.z = 0
-    }
   }
 
-  private updateJumping(delta: number, context: MotorcycleAnimationContext): void {
+  private updateJumping(delta: number, _context: MotorcycleAnimationContext): void {
     this.wheelRotation += AnimationConfig.WHEEL_ROTATION_SPEED * delta
 
     if (this.frontWheel) {
@@ -147,13 +138,6 @@ export class MotorcycleAnimator implements AnimationController {
     }
     if (this.rearWheel) {
       this.rearWheel.rotation.x = -this.wheelRotation
-    }
-
-    if (context.targetLane && this.bodyPivot) {
-      const leanDirection = context.targetLane === 'left' ? 1 : -1
-      const leanAmount = Math.sin(context.laneProgress * Math.PI)
-      this.currentLean = leanDirection * leanAmount * AnimationConfig.LEAN_ANGLE
-      this.bodyPivot.rotation.z = this.currentLean
     }
   }
 
@@ -166,7 +150,6 @@ export class MotorcycleAnimator implements AnimationController {
   reset(): void {
     this._currentState = AnimationState.IDLE
     this.wheelRotation = 0
-    this.currentLean = 0
     this.wheelieActive = false
     this.wheelieTime = 0
     this.currentWheelieAngle = 0
