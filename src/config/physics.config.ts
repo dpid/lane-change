@@ -22,7 +22,8 @@ export const PhysicsConfig = {
   COLLISION_SHRINK: 0.1,
   COLLECTION_EXPANSION: 0.15,
 
-  INVINCIBILITY_DURATION_MS: 3000
+  INVINCIBILITY_DURATION_MS: 3000,
+  EXTENDED_INVINCIBILITY_DURATION_MS: 6000
 } as const
 
 export type PhysicsConfigType = typeof PhysicsConfig

@@ -50,6 +50,7 @@ export class Game {
 
   private state: GameState = GameState.MENU
   private score: number = 0
+  private invincibilityStartTime: number = 0
   private invincibilityEndTime: number = 0
 
   constructor() {
@@ -132,7 +133,8 @@ export class Game {
     this.motorcycle.on('dropComplete', () => {
       if (this.state === GameState.DROPPING) {
         this.state = GameState.PLAYING
-        this.invincibilityEndTime = Date.now() + PhysicsConfig.INVINCIBILITY_DURATION_MS
+        this.invincibilityStartTime = Date.now()
+        this.invincibilityEndTime = this.invincibilityStartTime + PhysicsConfig.INVINCIBILITY_DURATION_MS
       }
     })
 
@@ -140,7 +142,8 @@ export class Game {
       if (this.state === GameState.PLAYING) {
         this.motorcycle.triggerWheelie()
         if (this.scrollManager.isAtMaxSpeed()) {
-          this.invincibilityEndTime = Date.now() + PhysicsConfig.INVINCIBILITY_DURATION_MS
+          this.invincibilityStartTime = Date.now()
+          this.invincibilityEndTime = this.invincibilityStartTime + PhysicsConfig.EXTENDED_INVINCIBILITY_DURATION_MS
         }
       }
     })
@@ -279,8 +282,9 @@ export class Game {
 
     if (this.state === GameState.PLAYING) {
       if (this.isInvincible()) {
-        const elapsed = Date.now() - (this.invincibilityEndTime - PhysicsConfig.INVINCIBILITY_DURATION_MS)
-        const progress = elapsed / PhysicsConfig.INVINCIBILITY_DURATION_MS
+        const elapsed = Date.now() - this.invincibilityStartTime
+        const duration = this.invincibilityEndTime - this.invincibilityStartTime
+        const progress = elapsed / duration
         this.motorcycle.updateInvincibilityFlicker(progress, delta)
       } else {
         this.motorcycle.updateInvincibilityFlicker(1, delta)
