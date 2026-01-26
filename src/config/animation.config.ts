@@ -1,5 +1,6 @@
 export const AnimationConfig = {
   WHEEL_ROTATION_SPEED: 15,
+  LEAN_ANGLE: 0.4,
   COIN_ROTATION_SPEED: 3,
   WHEELIE_DURATION: 2.0,
   WHEELIE_ANGLE: -0.611,
@@ -8,7 +9,7 @@ export const AnimationConfig = {
 
   INVINCIBILITY_FLICKER_START_PERIOD: 0.15,
   INVINCIBILITY_FLICKER_END_PERIOD: 0.04,
-  INVINCIBILITY_MIN_OPACITY: 0.2
+  INVINCIBILITY_MIN_OPACITY: 0.1
 } as const
 
-export type AnimationConfigType = typeof AnimationConfig
+
